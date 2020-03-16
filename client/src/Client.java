@@ -3,7 +3,6 @@ import java.net.*;
 
 public class Client{
 
-
     public static void main(String[] args){
 
         String nomMaquina;
@@ -35,13 +34,8 @@ public class Client{
             }
         }
 
-
         protocol.connexio(nomMaquina, numPort);
 
-
-
-
     }
-
 }
 

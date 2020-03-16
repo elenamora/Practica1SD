@@ -1,4 +1,6 @@
 
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -25,6 +27,18 @@ public class Protocol{
         }
     }
 
+    public void desconnexio(){
+        try {
+            if(socket != null){
+                socket.close();
+                System.out.println("Hem desconnectat de la partida");
+            }
+        }catch (IOException e){
+            System.out.println("No s'ha pogut desconnectar del servidor");
+        }
+    }
+
+
     public void start(int players) {
 
         try {
@@ -35,7 +49,7 @@ public class Protocol{
 
         } catch (IOException e) {
 
-
+            System.out.println("No s'ha pogut iniciar partida");
         }
     }
 
@@ -48,10 +62,10 @@ public class Protocol{
 
             } catch (IOException e) {
 
-                e.printStackTrace();
+                System.out.println("No s'ha pogut iniciar partida");
             }
 
-        };
+        }
 
         public void take(int cant, ArrayList dados) {
 
@@ -68,40 +82,31 @@ public class Protocol{
             }
 
             try {
-
                 utils.write_string("TAKE");
 
             } catch (IOException e) {
-
                 e.printStackTrace();
             }
-
         }
 
         public void pass() {
 
             try {
-
                 utils.write_string("PASS");
 
             } catch (IOException e) {
-
                 e.printStackTrace();
             }
-
         }
 
         public void exit() {
 
             try {
-
                 utils.write_string("EXIT");
 
             } catch (IOException e) {
-
                 e.printStackTrace();
             }
-
         }
 
         public void cash(int dinero) {
@@ -121,15 +126,12 @@ public class Protocol{
         public void loot(int dinero) {
 
             try {
-
                 utils.write_string("LOOT");
                 utils.write_int32(dinero);
 
             } catch (IOException e) {
-
                 e.printStackTrace();
             }
-
         }
 
         public void play(int turno) {

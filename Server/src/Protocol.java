@@ -2,12 +2,14 @@
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Protocol {
 
     InetAddress maquinaServidora;
     Socket socket = null;
-    utils.ComUtils utils;
+    ComUtils utils;
+    Random random = new Random();
 
 
     public void connexio(String nomMaquina, int numPort) {
@@ -18,7 +20,7 @@ public class Protocol {
 
             socket = new Socket(maquinaServidora, numPort);
 
-            utils = new utils.ComUtils(socket);
+            utils = new ComUtils(socket);
 
         } catch (IOException e) {
 
@@ -85,7 +87,7 @@ public class Protocol {
 
         } catch (IOException e) {
 
-            e.printStackTrace();
+            System.out.println("No s'ha pogut sortir");
         }
 
     }
@@ -172,6 +174,20 @@ public class Protocol {
 
             e.printStackTrace();
         }
+
+    }
+
+    public int turn(){
+        int turn = random.nextInt(2);
+        System.out.println("És el torn de" + turn);
+
+
+
+        if(turn == 1){
+            return 1;
+        }
+
+        return 0;
 
     }
 

@@ -1,4 +1,3 @@
-package utils;
 
 import java.io.*;
 import java.net.Socket;
@@ -10,8 +9,8 @@ public class ComUtils {
     private DataOutputStream dataOutputStream;
 
     public ComUtils(Socket socket) throws IOException {
-        dataInputStream = new DataInputStream(dataInputStream);
-        dataOutputStream = new DataOutputStream(dataOutputStream);
+        dataInputStream = new DataInputStream(socket.getInputStream());
+        dataOutputStream = new DataOutputStream(socket.getOutputStream());
     }
 
     public int read_int32() throws IOException {
@@ -162,6 +161,20 @@ public class ComUtils {
     public void write_blankSpace() throws IOException {
         byte[] var1 = new byte[]{32};
         this.dataOutputStream.write(var1, 0, 1);
+    }
+
+    public String read_blankSpace() throws IOException{
+        String result;
+        byte[] bStr = new byte[1];
+        char[] cStr = new char[1];
+
+        bStr = read_bytes(1);
+
+        cStr[0]= (char) bStr[0];
+
+        result = String.valueOf(cStr);
+
+        return result;
     }
 }
 

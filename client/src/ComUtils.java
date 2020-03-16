@@ -1,7 +1,6 @@
 
 import java.io.*;
 import java.net.*;
-import java.util.Locale;
 
 public class ComUtils {
     private final int STRSIZE = 40;
@@ -162,6 +161,20 @@ public class ComUtils {
     public void write_blankSpace() throws IOException {
         byte[] var1 = new byte[]{32};
         this.dataOutputStream.write(var1, 0, 1);
+    }
+
+    public String read_blankSpace() throws IOException{
+        String result;
+        byte[] bStr = new byte[1];
+        char[] cStr = new char[1];
+
+        bStr = read_bytes(1);
+
+        cStr[0]= (char) bStr[0];
+
+        result = String.valueOf(cStr);
+
+        return result;
     }
 }
 
