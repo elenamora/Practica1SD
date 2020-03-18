@@ -4,13 +4,14 @@ import java.net.Socket;
 public class ComUtils {
     private final int STRSIZE = 40;
 
-    private DataInputStream dataInputStream;
-    private DataOutputStream dataOutputStream;
+    private final DataInputStream dataInputStream;
+    private final DataOutputStream dataOutputStream;
 
     public ComUtils(Socket socket) throws IOException {
         dataInputStream = new DataInputStream(socket.getInputStream());
         dataOutputStream = new DataOutputStream(socket.getOutputStream());
     }
+
 
     public int read_int32() throws IOException {
         byte bytes[] = read_bytes(4);

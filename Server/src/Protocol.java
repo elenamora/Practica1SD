@@ -12,7 +12,7 @@ public class Protocol {
 
     private int singlePlayer;
 
-    int portServidor = 1215;
+    int portServidor = 5000;
     ServerSocket serverSocket1, serverSocket2;
 
     private ComUtils[] utilsL;
@@ -41,9 +41,14 @@ public class Protocol {
         else {
 
             serverSocket1 = new ServerSocket(portServidor);
+
             socket1 = serverSocket1.accept();
 
+            System.out.println("Hola");
+
             utils1 = new ComUtils(socket1);
+
+            utilsL = new ComUtils[]{utils1};
 
         }
 
@@ -273,15 +278,16 @@ public class Protocol {
 
         try {
 
-            read = utilsL[jugadorActual].read_string();
-            utilsL[jugadorActual].read_blankSpace();
-            val = utilsL[jugadorActual].read_int32();
+            read = utilsL[0].read_string();
+            utilsL[0].read_blankSpace();
+            val = utilsL[0].read_int32();
+
+            System.out.println(Integer.toString(val));
+
 
         }
 
         catch(IOException e) {
-
-            error(jugadorActual,4, "Error");
 
             e.printStackTrace();
 
@@ -289,17 +295,11 @@ public class Protocol {
 
         if (read.equals("STRT")) {
 
-            if (val <= 2 && val >= 0) {
+            System.out.println("Holax2");
 
-                return val;
+            return val;
 
-            }
 
-            else  {
-
-                error(jugadorActual,4, "Error: valor de jugador incorrecte");
-
-            }
 
         }
 

@@ -6,14 +6,16 @@ import java.util.concurrent.TimeoutException;
 
 public class Client{
 
-    public static void main(String[] args) throws IOException, TimeoutException {
+    public static void main(String[] args2) throws IOException, TimeoutException {
+
+        String[] args = {"25.71.79.215", "5000", "0"};
 
         String nomMaquina;
         int numPort, mode = 0, id ;
         Scanner sc = new Scanner(System.in);
 
 
-        if(args.length != 2){
+        if(args.length != 3){
             System.out.println("Us: java Client <maquina_servidora> <port> [0|1|2]");
             System.exit(1);
         }
@@ -35,10 +37,12 @@ public class Client{
         id = sc.nextInt();
 
         Protocol protocol = new Protocol();
-        Joc joc = new Joc(protocol, mode, id);
 
         protocol.connexio(nomMaquina, numPort);
+
         protocol.start(id);
+
+        Joc joc = new Joc(protocol, mode, id);
 
         if (mode == 0 || mode == 2){
             joc.jugar();

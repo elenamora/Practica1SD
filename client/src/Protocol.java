@@ -1,7 +1,3 @@
-
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
-
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -10,7 +6,7 @@ import java.util.Scanner;
 public class Protocol{
 
     InetAddress maquinaServidora;
-    Socket socket = null;
+    Socket socket;
     ComUtils utils;
     Scanner sc;
 
@@ -47,6 +43,8 @@ public class Protocol{
 
     /*** Funció que ens permet iniciar la partida on hem d'indicar el nostre id com a jugadors ***/
     public void start(int id) {
+
+        System.out.println("Hola");
 
         try {
 
@@ -136,18 +134,15 @@ public class Protocol{
 
     /*** Funció que rep el cash que ens envia el Servidor ***/
     public int read_cash() throws IOException{
-        String cash = "";
-        String blnc;
-        int val = 0;
 
-        try {
-            cash = utils.read_string();
-            blnc = utils.read_blankSpace();
-            val = utils.read_int32();
-        }
-        catch(IOException e) {
-            System.out.println("No hem pogut rebre cash del Servidor");
-        }
+        System.out.println("Ahora estoy en cash!");
+
+        String cash = "";
+        int val = -1;
+
+        cash = utils.read_string();
+        utils.read_blankSpace();
+        val = utils.read_int32();
 
         if (cash.equals("CASH")) {
             return val;
@@ -157,7 +152,7 @@ public class Protocol{
             try {
                 error();
             } catch (IOException e){
-               System.out.println("Hi ha hagut un error al rebre el cash");
+                System.out.println("Hi ha hagut un error al rebre el cash");
             }
         }
 

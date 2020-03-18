@@ -29,10 +29,18 @@ public class Joc {
         this.mode = mode;
         sc = new Scanner(System.in);
 
-        while (protocol.read_cash()==-1){
+        puntuacio = protocol.read_cash();
+
+        while (puntuacio == -1){
+
+            puntuacio = protocol.read_cash();
+
         }
 
-        puntuacio = p.read_cash();
+        System.out.println(Integer.toString(puntuacio));
+
+        partida.setEstat(Partida.EstatPartida.BETT);
+
     }
 
     public void jugar() throws IOException {
@@ -48,7 +56,10 @@ public class Joc {
                         protocol.exit();
 
                     } else {
+
+                        System.out.println("jugar");
                         protocol.bett();
+                        protocol.read_loot();
                         puntuacio -= 1;
                         partida.setEstat(Partida.EstatPartida.ROLL);
                     }

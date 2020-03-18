@@ -28,28 +28,37 @@ public class Joc {
 
     }
 
-    public void newGame(){
+    public void newGame() throws IOException {
+
+        System.out.println("Hola");
 
         while (true) {
 
             if (singlePlayer == 1) {
 
-                while(protocol.readStrt(0) == -1 || !keePlaying) {
+                int id = protocol.readStrt(0);
 
+                while(id == -1) {
 
-
-                }
-
-                if(!keePlaying) {
-
-                    jugador1 = new Jugador(5, protocol.readStrt(0));
-                    jugador2 = new Jugador(5000, jugador1.getId() + 1);
-
-                    keePlaying = true;
-
-                    jugadorList = new Jugador[]{jugador1, jugador2};
+                    id = protocol.readStrt(0);
 
                 }
+
+                System.out.println("Hemos salido del loop");
+
+                //if(keePlaying == false) {
+
+
+                jugador1 = new Jugador(5, id);
+                jugador2 = new Jugador(5000, jugador1.getId() + 1);
+
+                keePlaying = true;
+
+                jugadorList = new Jugador[]{jugador1, jugador2};
+
+                System.out.println("Hemos creado los jugadores!!");
+
+                //}
 
                 bettSingle();
                 jugarSinglePlayer();
@@ -293,6 +302,8 @@ public class Joc {
         protocol.play(0, pTurn);
 
         state = "DICE";
+
+        System.out.println("Hemos terminado el bett");
 
 
     }
