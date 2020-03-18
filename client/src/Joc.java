@@ -5,6 +5,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
 
 public class Joc {
 
@@ -12,22 +13,26 @@ public class Joc {
     private Protocol protocol;
     private Random r = new Random();
     private Scanner sc;
-    private int mode;
-    private int puntuacio;
+    private int mode, id;
+    private int puntuacio = -1;
     private ArrayList daus = new ArrayList();
     public ArrayList dausGuardats = new ArrayList();
     public int tirades = 3;
 
     static private String[] menu = {"Tirar Daus", "Guardar daus", "Passar torn", "Sortir de l'aplicació"};
 
-    public Joc(Protocol p, int mode) throws IOException {
+    public Joc(Protocol p, int mode, int id) throws IOException, TimeoutException {
 
+        this.id = id;
         this.partida = new Partida();
         this.protocol = p;
         this.mode = mode;
         sc = new Scanner(System.in);
-        puntuacio = p.read_cash();
 
+        while (protocol.read_cash()==-1){
+        }
+
+        puntuacio = p.read_cash();
     }
 
     public void jugar() throws IOException {
@@ -47,6 +52,11 @@ public class Joc {
                         puntuacio -= 1;
                         partida.setEstat(Partida.EstatPartida.ROLL);
                     }
+
+                    while (!protocol.read_loot() && protocol.read_play() == -1){
+
+                    }
+
 
                     break;
 
@@ -138,7 +148,7 @@ public class Joc {
                     break;
 
                 case PASS:
-                    protocol.pass();
+                    protocol.pass(id);
                     partida.setEstat(Partida.EstatPartida.PASS);
                     break;
 
@@ -168,7 +178,7 @@ public class Joc {
 
     }
 
-    public void guanyarPartida() {
+    public void guanyarPartida() throws IOException {
         if (protocol.read_win()) {
             System.out.println("Has guanyat");
         } else {
@@ -176,6 +186,10 @@ public class Joc {
         }
 
         System.out.println("La teva puntuació final és: " + protocol.read_pnts() + "punts");
+
+        while (protocol.read_cash() == -1){
+
+        }
     }
 
 
@@ -270,7 +284,7 @@ public class Joc {
                                     suma = (int) dausGuardats.get(3) + (int) dausGuardats.get(4);
                                     if (suma > 7) {
                                         partida.setEstat(Partida.EstatPartida.PASS);
-                                        protocol.take(num, dausGuardats);
+                                        protocol.take(id, dausGuardats);
                                         break;
                                     } else {
                                         partida.setEstat(Partida.EstatPartida.ROLL);
@@ -285,13 +299,13 @@ public class Joc {
 
                         }
 
-                        protocol.take(num, dausGuardats);
+                        protocol.take(id, dausGuardats);
                         partida.setEstat(Partida.EstatPartida.ROLL);
 
                         break;
 
                     case PASS:
-                        protocol.pass();
+                        protocol.pass(id);
                         partida.setEstat(Partida.EstatPartida.PASS);
                         break;
 

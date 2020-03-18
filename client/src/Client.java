@@ -2,16 +2,14 @@
 import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
 
 public class Client{
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, TimeoutException {
 
         String nomMaquina;
-        int numPort, mode = 0;
-
-        Protocol protocol = new Protocol();
-        Joc joc = new Joc(protocol, mode);
+        int numPort, mode = 0, id ;
         Scanner sc = new Scanner(System.in);
 
 
@@ -33,8 +31,14 @@ public class Client{
             }
         }
 
+        System.out.print("Posa el teu id: ");
+        id = sc.nextInt();
+
+        Protocol protocol = new Protocol();
+        Joc joc = new Joc(protocol, mode, id);
+
         protocol.connexio(nomMaquina, numPort);
-        protocol.start();
+        protocol.start(id);
 
         if (mode == 0 || mode == 2){
             joc.jugar();

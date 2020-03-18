@@ -46,11 +46,9 @@ public class Protocol{
 
 
     /*** Funció que ens permet iniciar la partida on hem d'indicar el nostre id com a jugadors ***/
-    public void start() {
+    public void start(int id) {
 
         try {
-            System.out.print("Posa el teu id: ");
-            int id = sc.nextInt();
 
             utils.write_string("STRT");
             utils.write_blankSpace();
@@ -75,33 +73,49 @@ public class Protocol{
 
     }
 
-    public void take(int cant, ArrayList dados) {
+    public void take(int id, ArrayList dados) throws IOException {
 
-        if (cant > 0) {
+        if (dados.size() > 0) {
 
-            // mandas take + posicion de todos lo dados (posiciones de la array)
+            try {
+                utils.write_string("TAKE");
+                utils.write_blankSpace();
+                utils.write_byte((byte) dados.size());
+
+                for (int i = 0; i < dados.size(); i++) {
+
+                    utils.write_blankSpace();
+                    utils.write_byte((byte) dados.get(i));
+
+                }
+            } catch (IOException e) {
+                System.out.println("No s'han pogut escollir els daus");
+            }
+
+        }else {
+
+            try {
+
+                utils.write_string("TAKE");
+                utils.write_blankSpace();
+                utils.write_byte((byte) dados.size());
+
+            } catch (IOException e) {
+
+                System.out.println("No s'han pogut escollir els daus");
+            }
 
         }
 
-        else {
-
-            // mandas take + 0x00
-
-        }
-
-        try {
-            utils.write_string("TAKE");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     /*** Funció que permet al jugador passar el seu torn ***/
-    public void pass() {
+    public void pass(int id) {
 
         try {
             utils.write_string("PASS");
+            utils.write_blankSpace();
+            utils.write_int32(id);
 
         } catch (IOException e) {
             System.out.println("No s'ha pogut passar");
@@ -152,24 +166,42 @@ public class Protocol{
 
 
 
-    public void loot(int dinero) {
+    public boolean read_loot() {
+
+        String loot = "", blnc = "";
+        int dinero = 0;
 
         try {
-            utils.write_string("LOOT");
-            utils.write_int32(dinero);
+            loot = utils.read_string();
+            blnc = utils.read_blankSpace();
+            dinero = utils.read_int32();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("No hem pogut rebre el loot");
         }
+
+        if (loot.equals("LOOT")){
+            return true;
+        }
+        else{
+            try {
+                error();
+            } catch (IOException e){
+                System.out.println("Hi ha hagut un error al rebre el loot");
+            }
+        }
+        return false;
+
     }
 
     /*** Funció que retorna un int indicant qui comença primer ***/
     public int read_play() {
-        String play = "";
+        String play = "", blnc = "";
         int turn = 0;
 
         try {
             play = utils.read_string();
+            blnc = utils.read_blankSpace();
             turn = utils.read_int32();
         }
         catch(IOException e) {

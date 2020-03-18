@@ -6,20 +6,50 @@ import java.util.Random;
 
 public class Protocol {
 
-    InetAddress maquinaServidora;
-    Socket socket = null;
-    ComUtils utils;
+    private Socket socket1, socket2;
+    ComUtils utils1, utils2;
     Random random = new Random();
 
-    int portServidor = 1215;
-    ServerSocket serverSocket = null;
+    private int singlePlayer;
 
-    Protocol(String[] args){
+    int portServidor = 1215;
+    ServerSocket serverSocket1, serverSocket2;
+
+    private ComUtils[] utilsL;
+
+    Protocol(String[] args) throws IOException {
 
         portServidor = Integer.parseInt(args[0]);
 
+        singlePlayer = Integer.parseInt(args[1]);
+
+        if ( singlePlayer == 2){
+
+            serverSocket1 = new ServerSocket(portServidor);
+            serverSocket2 = new ServerSocket(portServidor + 1);
+
+            socket1 = serverSocket1.accept();
+            socket2 = serverSocket2.accept();
+
+            utils1 = new ComUtils(socket1);
+            utils2 = new ComUtils(socket2);
+
+            utilsL = new ComUtils[]{utils1, utils2};
+
+        }
+
+        else {
+
+            serverSocket1 = new ServerSocket(portServidor);
+            socket1 = serverSocket1.accept();
+
+            utils1 = new ComUtils(socket1);
+
+        }
+
     }
 
+    /*
     public void xd() {
 
         try{
@@ -64,21 +94,55 @@ public class Protocol {
         }
     }
 
-    public void take ( int cant, ArrayList dados){
+     */
+
+    public void take (int jugadorActual, int cant, ArrayList dados){
 
         if (cant > 0) {
 
-            // mandas take + posicion de todos lo dados (posiciones de la array)
+            try {
+
+                utilsL[jugadorActual].write_string("TAKE");
+                utilsL[jugadorActual].write_blankSpace();
+                utilsL[jugadorActual].write_byte((byte) cant);
+
+                for (int i = 0; i < cant; i ++) {
+
+                    utilsL[jugadorActual].write_blankSpace();
+                    utilsL[jugadorActual].write_byte((byte) dados.get(i));
+
+                }
+
+            } catch (IOException e) {
+
+                e.printStackTrace();
+            }
+
 
         } else {
 
-            // mandas take + 0x00
+            try {
+
+                utilsL[jugadorActual].write_string("TAKE");
+                utilsL[jugadorActual].write_blankSpace();
+                utilsL[jugadorActual].write_byte((byte) cant);
+
+            } catch (IOException e) {
+
+                e.printStackTrace();
+            }
 
         }
 
+    }
+
+    public void pass (int jugadorActual, int id) {
+
         try {
 
-            utils.write_string("TAKE");
+            utilsL[jugadorActual].write_string("PASS");
+            utilsL[jugadorActual].write_blankSpace();
+            utilsL[jugadorActual].write_int32(id);
 
         } catch (IOException e) {
 
@@ -87,11 +151,13 @@ public class Protocol {
 
     }
 
-    public void pass () {
+    public void cash (int jugadorActual, int dinero){
 
         try {
 
-            utils.write_string("PASS");
+            utilsL[jugadorActual].write_string("CASH");
+            utilsL[jugadorActual].write_blankSpace();
+            utilsL[jugadorActual].write_int32(dinero);
 
         } catch (IOException e) {
 
@@ -100,26 +166,13 @@ public class Protocol {
 
     }
 
-    public void cash (int jugador, int dinero){
+    public void loot (int jugadorActual, int dinero){
 
         try {
 
-            utils.write_string("CASH");
-            utils.write_int32(dinero);
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        }
-
-    }
-
-    public void loot (int jugador, int dinero){
-
-        try {
-
-            utils.write_string("LOOT");
-            utils.write_int32(dinero);
+            utilsL[jugadorActual].write_string("LOOT");
+            utilsL[jugadorActual].write_blankSpace();
+            utilsL[jugadorActual].write_int32(dinero);
 
         }
 
@@ -130,12 +183,13 @@ public class Protocol {
 
     }
 
-    public void play (int jugador, int turno){
+    public void play (int jugadorActual, int turno){
 
         try {
 
-            utils.write_string("PLAY");
-            utils.write_int32(turno);
+            utilsL[jugadorActual].write_string("PLAY");
+            utilsL[jugadorActual].read_blankSpace();
+            utilsL[jugadorActual].write_int32(turno);
 
         }
 
@@ -146,16 +200,16 @@ public class Protocol {
 
     }
 
-    public void dice (int[] dices){
+    public void dice (int jugadorActual, int[] dices){
 
         try {
 
-            utils.write_string("DICE");
+            utilsL[jugadorActual].write_string("DICE");
 
             for (int i = 0; i < dices.length; i++) {
 
-                utils.write_blankSpace();
-                utils.write_string(Integer.toString(dices[i]));
+                utilsL[jugadorActual].write_blankSpace();
+                utilsL[jugadorActual].write_string(Integer.toString(dices[i]));
 
 
             }
@@ -169,12 +223,13 @@ public class Protocol {
 
     }
 
-    public void pnts (int score){
+    public void pnts (int jugadorActual, int score){
 
         try {
 
-            utils.write_string("PNTS");
-            utils.write_int32(score);
+            utilsL[jugadorActual].write_string("PNTS");
+            utilsL[jugadorActual].write_blankSpace();
+            utilsL[jugadorActual].write_int32(score);
 
         }
 
@@ -185,12 +240,13 @@ public class Protocol {
 
     }
 
-    public void wins (int win){
+    public void wins (int jugadorActual, int win){
 
         try {
 
-            utils.write_string("WINS");
-            utils.write_int32(win);
+            utilsL[jugadorActual].write_string("WINS");
+            utilsL[jugadorActual].write_blankSpace();
+            utilsL[jugadorActual].write_int32(win);
 
         }
 
@@ -210,22 +266,22 @@ public class Protocol {
 
     }
 
-    public int readStrt(int jugador) {
+    public int readStrt(int jugadorActual) {
 
         String read = "";
         int val = -1;
 
         try {
 
-            read = utils.read_string();
-            //utils.read_blankSpace();
-            val = utils.read_int32();
+            read = utilsL[jugadorActual].read_string();
+            utilsL[jugadorActual].read_blankSpace();
+            val = utilsL[jugadorActual].read_int32();
 
         }
 
         catch(IOException e) {
 
-            error(4, "Error");
+            error(jugadorActual,4, "Error");
 
             e.printStackTrace();
 
@@ -241,7 +297,7 @@ public class Protocol {
 
             else  {
 
-                error(4, "Error: valor de jugador incorrecte");
+                error(jugadorActual,4, "Error: valor de jugador incorrecte");
 
             }
 
@@ -251,19 +307,19 @@ public class Protocol {
 
     }
 
-    public boolean readBett(int jugador) {
+    public boolean readBett(int jugadorActual) {
 
         String read = "";
 
         try {
 
-            read = utils.read_string();
+            read = utilsL[jugadorActual].read_string();
 
         }
 
         catch(IOException e) {
 
-            error(4, "Error");
+            error(jugadorActual,4, "Error");
             e.printStackTrace();
 
         }
@@ -282,7 +338,7 @@ public class Protocol {
 
     }
 
-    public ArrayList<Integer> readTake() {
+    public ArrayList<Integer> readTake(int jugadorActual) {
 
         String read = "";
         String amm;
@@ -290,13 +346,14 @@ public class Protocol {
 
         try {
 
-            read = utils.read_string();
-            //utils.read_blankSpace();
-            amm = utils.read_string();
+            read = utilsL[jugadorActual].read_string();
+            utilsL[jugadorActual].read_blankSpace();
+            amm = utilsL[jugadorActual].read_string();
 
             for (int i = 0; i < Integer.valueOf(amm); i ++) {
 
-                dicesPos.add(Integer.valueOf(utils.read_string()));
+                utilsL[jugadorActual].read_blankSpace();
+                dicesPos.add(Integer.valueOf(utilsL[jugadorActual].read_string()));
 
             }
 
@@ -305,7 +362,7 @@ public class Protocol {
 
         catch(IOException e) {
 
-            error(4, "Error");
+            error(jugadorActual,4, "Error");
 
             e.printStackTrace();
 
@@ -326,19 +383,19 @@ public class Protocol {
 
     }
 
-    public boolean readPass() {
+    public boolean readPass(int jugadorActual) {
 
         String read = "";
 
         try {
 
-            read = utils.read_string();
+            read = utilsL[jugadorActual].read_string();
 
         }
 
         catch(IOException e) {
 
-            error(4, "Error");
+            error(jugadorActual,4, "Error");
             e.printStackTrace();
 
         }
@@ -357,19 +414,19 @@ public class Protocol {
 
     }
 
-    public boolean readExit() {
+    public boolean readExit(int jugadorActual) {
 
         String read = "";
 
         try {
 
-            read = utils.read_string();
+            read = utilsL[jugadorActual].read_string();
 
         }
 
         catch(IOException e) {
 
-            error(4, "Error");
+            error(jugadorActual,4, "Error");
             e.printStackTrace();
 
         }
@@ -388,13 +445,13 @@ public class Protocol {
 
     }
 
-    public void error(int hd, String txtError) {
+    public void error(int jugadorActual, int hd, String txtError) {
 
         try {
 
-            utils.write_string("ERRO");
-            utils.write_blankSpace();
-            utils.write_string_variable(hd, txtError);
+            utilsL[jugadorActual].write_string("ERRO");
+            utilsL[jugadorActual].write_blankSpace();
+            utilsL[jugadorActual].write_string_variable(hd, txtError);
 
         }
         catch(IOException e) {

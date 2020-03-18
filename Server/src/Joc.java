@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Joc {
@@ -10,7 +11,7 @@ public class Joc {
 
     private Jugador[] jugadorList; // Lista de jugadores
 
-    private int bett, turn, AuxScore, pTurn; // bett = dinero apostado en total, turn = turno que esta jugandose ahora (hasta 3), AuxScore = score para la IA de j2, pTurn = Jugador que empieza
+    private int bett, turn, pTurn; // bett = dinero apostado en total, turn = turno que esta jugandose ahora (hasta 3), AuxScore = score para la IA de j2, pTurn = Jugador que empieza
 
     private boolean notPlayed1 = false, notPlayed2 = false, playing; // notplayed1 = j1 no ha jugado, notPlayed2 = j2 no ha jugado, playing = j no se ha plantado
 
@@ -18,7 +19,9 @@ public class Joc {
 
     private String state = "";
 
-    Joc (String[] args) {
+    private boolean keePlaying = false;
+
+    Joc (String[] args) throws IOException {
 
         protocol = new Protocol(args);
         singlePlayer = Integer.parseInt(args[1]);
@@ -31,22 +34,30 @@ public class Joc {
 
             if (singlePlayer == 1) {
 
-                while(protocol.readStrt(0) == -1) {
+                while(protocol.readStrt(0) == -1 || !keePlaying) {
 
 
 
                 }
 
-                jugador1 = new Jugador(5, protocol.readStrt(0));
-                jugador2 = new Jugador(5, jugador1.getId() + 1);
+                if(!keePlaying) {
 
-                jugadorList = new Jugador[]{jugador1, jugador2};
+                    jugador1 = new Jugador(5, protocol.readStrt(0));
+                    jugador2 = new Jugador(5000, jugador1.getId() + 1);
 
+                    keePlaying = true;
+
+                    jugadorList = new Jugador[]{jugador1, jugador2};
+
+                }
+
+                bettSingle();
                 jugarSinglePlayer();
 
                 if (state == "EXIT") {
 
-                    //notsarted
+                    jugador1 = null;
+                    keePlaying = false;
 
                 }
 
@@ -74,13 +85,8 @@ public class Joc {
 
                 }
 
-                bett += 2;
+                bettMulti();
 
-                protocol.loot(0, bett);
-                protocol.loot(1, bett);
-                pTurn = protocol.turn();
-                protocol.play(0, pTurn);
-                protocol.play(1, pTurn);
                 jugarMultiPlayer();
 
             }
@@ -102,9 +108,9 @@ public class Joc {
 
                     switch (state) {
 
-                        case "BETT":
+                        case "DICE":
 
-                            bett();
+                            dice(0);
                             break;
 
                         case "TAKE":
@@ -122,20 +128,21 @@ public class Joc {
                             exit();
                             break;
 
+                        default:
+                            break;
+
                     }
 
-                    if(protocol.readPass()){
-
-                        state = "PASS";
-                    }
-
-                    else if(protocol.readExit()) {
+                    if(protocol.readExit(0)) {
 
                         state = "EXIT";
 
                     }
 
+
                 } while(playing || turn < 3);
+
+                protocol.pnts(0, jugadorList[0].getPuntuacion());
 
             }
 
@@ -147,7 +154,7 @@ public class Joc {
 
         }
 
-        sendPuntuacio();
+        sendPuntuacio(0);
 
     }
 
@@ -155,32 +162,56 @@ public class Joc {
 
         while (!notPlayed1 && !notPlayed2) {
 
+            playing = true;
+            turn = 0;
+
             if(pTurn == 0){
 
                 do {
 
                     switch (state) {
 
-                        case "BETT":
+                        case "DICE":
 
-                            bett();
+                            dice(0);
+                            protocol.dice(1, jugadorList[0].getDiceList());
                             break;
 
                         case "TAKE":
 
-                            //enviem informacio dels daus i esperem a que hi hagi una resposta per part de l'usuari
-
+                            take(0);
+                            protocol.take(1, jugadorList[0].getLockedDices().size(), jugadorList[0].getLockedDices());
                             break;
 
                         case "PASS":
 
-                            // jugador decideix plantar-se i juga l'altre jugador, en cas de que els dos hagin jugat s'acaba la partida
+                            pass();
+                            protocol.pass(1, jugadorList[0].getId());
+                            break;
 
+                        case "EXIT":
+
+                            exit();
+                            break;
+
+                        default:
                             break;
 
                     }
 
-                } while(!protocol.readExit());
+                    if(protocol.readExit(0)) {
+
+                        state = "EXIT";
+
+                    }
+
+
+                } while(playing || turn < 3);
+
+                protocol.pnts(0, jugadorList[0].getPuntuacion());
+                protocol.pnts(1, jugadorList[0].getPuntuacion());
+
+                state = "DICE";
 
             }
 
@@ -190,34 +221,58 @@ public class Joc {
 
                     switch (state) {
 
-                        case "BETT":
+                        case "DICE":
 
-                            bett();
+                            dice(1);
+                            protocol.dice(0, jugadorList[1].getDiceList());
                             break;
 
                         case "TAKE":
 
-                            //enviem informacio dels daus i esperem a que hi hagi una resposta per part de l'usuari
-
+                            take(1);
+                            protocol.take(0, jugadorList[1].getLockedDices().size(), jugadorList[1].getLockedDices());
                             break;
 
                         case "PASS":
 
-                            // jugador decideix plantar-se i juga l'altre jugador, en cas de que els dos hagin jugat s'acaba la partida
+                            pass();
+                            protocol.pass(0, jugadorList[1].getId());
+                            break;
 
+                        case "EXIT":
+
+                            exit();
+                            break;
+
+                        default:
                             break;
 
                     }
 
-                } while(!protocol.readExit());
+                    if(protocol.readExit(1)) {
+
+                        state = "EXIT";
+
+                    }
+
+
+                } while(playing || turn < 3);
+
+                protocol.pnts(0, jugadorList[1].getPuntuacion());
+                protocol.pnts(1, jugadorList[0].getPuntuacion());
 
             }
 
+            state = "DICE";
+
         }
+
+        sendPuntuacio(0);
+        sendPuntuacio(1);
 
     }
 
-    private void bett() {
+    private void bettSingle() {
 
         protocol.cash(0, jugadorList[0].getDinero());
 
@@ -227,6 +282,8 @@ public class Joc {
 
         }
 
+        jugadorList[0].setDinero(-1);
+
         bett += 2;
 
         protocol.loot(0, bett);
@@ -235,29 +292,86 @@ public class Joc {
 
         protocol.play(0, pTurn);
 
-        state = "TAKE";
+        state = "DICE";
+
 
     }
 
-    private void take(int jugadorActual) {
+    private void bettMulti() {
+
+        protocol.cash(0, jugadorList[0].getDinero());
+        protocol.cash(1, jugadorList[1].getDinero());
+
+        while(!protocol.readBett(0) && !protocol.readBett(1)) {
+
+
+
+        }
+
+        jugadorList[0].setDinero(-1);
+        jugadorList[1].setDinero(-1);
+
+        bett += 2;
+
+        protocol.loot(0, bett);
+        protocol.loot(1, bett);
+
+        pTurn = protocol.turn();
+
+        if(pTurn == 0) {
+
+            protocol.play(0, 0);
+            protocol.play(1, 1);
+
+        }
+
+        else {
+
+            protocol.play(0, 1);
+            protocol.play(1, 0);
+
+        }
+
+        state = "DICE";
+
+    }
+
+    private void dice(int jugadorActual) {
 
         jugadorList[jugadorActual].getNumber();
-        protocol.dice(jugadorList[jugadorActual].getDiceList());
-
-        int j = 0;
+        protocol.dice(jugadorActual, jugadorList[jugadorActual].getDiceList());
 
         while(true) {
 
-            d = protocol.readTake();
+            d = protocol.readTake(jugadorActual);
 
             if(d.get(0) != -1) {
 
+                state = "TAKE";
+                break;
+
+            }
+
+            else if(protocol.readPass(jugadorActual)) {
+
+                state = "PASS";
+                break;
+
+            }
+
+            else if(protocol.readExit(jugadorActual)) {
+
+                state = "EXIT";
                 break;
 
             }
 
 
         }
+
+    }
+
+    private void take(int jugadorActual) {
 
         if (d.size() == 5)  {
 
@@ -267,9 +381,13 @@ public class Joc {
 
         jugadorList[jugadorActual].sortDices(d);
 
-        protocol.pnts(jugadorList[jugadorActual].calculcateScore());
-
         turn++;
+
+        if (turn < 3) {
+
+            state = "DICE";
+
+        }
 
     }
 
@@ -299,139 +417,34 @@ public class Joc {
 
     }
 
-    /*
-
-    public void jugar() {
-
-        while (!notPlayed1 && !notPlayed2) {
-
-            if(singlePlayer == 1){
-
-                if (pTurn == 0) {
-
-                    it(0);
-
-                    notPlayed1 = true;
-                    pTurn = 1;
-
-                }
-
-                playing = true;
-
-            }
-
-            else if (singlePlayer == 2) {
-
-                if (pTurn == 0) {
-
-                    it(0);
-                    //j1 juega;
-                    notPlayed1 = true;
-                    pTurn = 1;
-
-                }
-
-                else {
-
-                    it(1);
-                    //j2 juega;
-                    notPlayed2 = true;
-                    pTurn = 0;
-
-                }
-
-            }
-
-            if (!mode && pTurn == 0 && notPlayed1) {
-
-                calculateScore();
-
-                pTurn = 1;
-
-                notPlayed1 = true;
-
-            }
-
-            else if (!mode && pTurn == 1 && notPlayed2) {
-
-                calculateScore();
-
-                pTurn = 0;
-
-                notPlayed2 = true;
-
-            }
-
-        }
-
-        sendPuntuacio();
-
-    }
-
-     */
-
-    private void sendPuntuacio() {
-
-        protocol.pnts(jugadorList[0].getPuntuacion());
+    private void sendPuntuacio(int jugador) {
 
         if(jugadorList[0].getPuntuacion() > jugadorList[1].getPuntuacion()) {
 
-            protocol.wins(0);
+            jugadorList[1].setDinero(bett);
+
+            bett = 0;
+
+            pTurn = 1;
+
+            protocol.wins(jugador, 0);
 
         }
 
         else if (jugadorList[0].getPuntuacion() < jugadorList[1].getPuntuacion()){
 
-            protocol.wins(1);
+
+            bett = 0;
+
+            pTurn = 0;
+
+            protocol.wins(jugador,1);
 
         }
 
         else {
 
-            protocol.wins(2);
-
-        }
-
-    }
-
-    private void it(int ju) {
-
-        while (playing && turn < 3){
-
-            jugadorList[ju].getNumber();
-            protocol.dice(jugadorList[ju].getDiceList());
-
-            int j = 0;
-
-            while(j < 10) {
-
-                d = protocol.readTake();
-                // arrayList con la posicion de los dados que hay que lockear
-                j++;
-
-            }
-
-            if (d.size() == 5)  {
-
-                playing = false;
-
-            }
-
-            jugadorList[ju].sortDices(d);
-
-            if (protocol.readPass()){
-
-                playing = false;
-
-            }
-
-            if (protocol.readExit()){
-
-                // eliminar jugador llista
-
-            }
-
-            turn++;
+            protocol.wins(jugador,2);
 
         }
 
@@ -442,6 +455,8 @@ public class Joc {
         while (playing && turn < 3) {
 
             jugadorList[1].getNumber();
+
+            protocol.dice(0, jugadorList[1].getDiceList());
 
             int x = 0;
 
@@ -473,19 +488,22 @@ public class Joc {
 
             } // Seleccio dels daus a guardar
 
-            protocol.take(0, jugadorList[1].getLockedDices());
+            protocol.take(0,jugadorList[1].getLockedDices().size(), jugadorList[1].getLockedDices());
 
             int resultat = jugadorList[1].calculcateScore();
 
             if (resultat > 6) {
 
                 playing = false;
+                protocol.pass(0, 8080);
 
             }
 
             turn ++;
 
         }
+
+        protocol.pnts(0, jugadorList[1].getPuntuacion());
 
         notPlayed2 = true;
         pTurn = 0;
