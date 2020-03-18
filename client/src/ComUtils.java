@@ -1,6 +1,5 @@
-
 import java.io.*;
-import java.net.*;
+import java.net.Socket;
 
 public class ComUtils {
     private final int STRSIZE = 40;
@@ -163,19 +162,29 @@ public class ComUtils {
         this.dataOutputStream.write(var1, 0, 1);
     }
 
-    public String read_blankSpace() throws IOException{
-        String result;
-        byte[] bStr = new byte[1];
-        char[] cStr = new char[1];
+    public String read_blankSpace() throws IOException {
 
-        bStr = read_bytes(1);
+        byte bStr[] = read_bytes(1);
+        char c = (char) bStr[0];
 
-        cStr[0]= (char) bStr[0];
+        return String.valueOf(c);
 
-        result = String.valueOf(cStr);
+    }
 
-        return result;
+    public byte read_byte() throws IOException {
+
+        byte bStr[] = read_bytes(4);
+
+        return (bStr[0]);
+
+    }
+
+    public void write_byte(byte a) throws IOException {
+
+        byte bytes[] = new byte[STRSIZE];
+        bytes[0] = a;
+
+        dataOutputStream.write(bytes, 0, 4);
+
     }
 }
-
-
