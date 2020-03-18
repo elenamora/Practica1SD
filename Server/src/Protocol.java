@@ -11,6 +11,42 @@ public class Protocol {
     ComUtils utils;
     Random random = new Random();
 
+    int portServidor = 1215;
+    ServerSocket serverSocket = null;
+
+    Protocol(String[] args){
+
+        portServidor = Integer.parseInt(args[0]);
+
+    }
+
+    public void xd() {
+
+        try{
+
+            serverSocket = new ServerSocket(portServidor);
+            System.out.println("Servidor Socket preparat en el port"+ portServidor);
+
+            while (true){
+                System.out.println("Esperant una connexió d'un client");
+
+                socket = serverSocket.accept();
+                System.out.println("Connexió acceptada d'un client");
+
+
+            }
+
+        }catch (IOException ex){
+            System.out.println("No s'ha pogut crear el servidor");
+        }finally {
+            try {
+                if(serverSocket != null) serverSocket.close();
+            }catch (IOException ex){
+                System.out.println("No s'ha pogut establir connexió amb el client");
+            }
+        }
+
+    }
 
     public void connexio(String nomMaquina, int numPort) {
 
@@ -26,21 +62,6 @@ public class Protocol {
 
             System.out.println("Error de connexió");
         }
-    }
-
-
-
-    public void bett () {
-
-        try {
-
-            utils.write_string("BETT");
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        }
-
     }
 
     public void take ( int cant, ArrayList dados){
@@ -79,20 +100,7 @@ public class Protocol {
 
     }
 
-    public void exit () {
-
-        try {
-
-            utils.write_string("EXIT");
-
-        } catch (IOException e) {
-
-            System.out.println("No s'ha pogut sortir");
-        }
-
-    }
-
-    public void cash ( int dinero){
+    public void cash (int jugador, int dinero){
 
         try {
 
@@ -106,91 +114,295 @@ public class Protocol {
 
     }
 
-    public void loot ( int dinero){
+    public void loot (int jugador, int dinero){
 
         try {
 
             utils.write_string("LOOT");
             utils.write_int32(dinero);
 
-        } catch (IOException e) {
+        }
+
+        catch (IOException e) {
 
             e.printStackTrace();
         }
 
     }
 
-    public void play ( int turno){
+    public void play (int jugador, int turno){
 
         try {
 
             utils.write_string("PLAY");
             utils.write_int32(turno);
 
-        } catch (IOException e) {
+        }
+
+        catch (IOException e) {
 
             e.printStackTrace();
         }
 
     }
 
-    public void dice (ArrayList dados){
-
-        // for los elementos de la array mandar DICE + 0xXX
+    public void dice (int[] dices){
 
         try {
 
             utils.write_string("DICE");
 
-        } catch (IOException e) {
+            for (int i = 0; i < dices.length; i++) {
+
+                utils.write_blankSpace();
+                utils.write_string(Integer.toString(dices[i]));
+
+
+            }
+
+        }
+
+        catch (IOException e) {
 
             e.printStackTrace();
         }
 
     }
 
-    public void pnts ( int score){
+    public void pnts (int score){
 
         try {
 
             utils.write_string("PNTS");
             utils.write_int32(score);
 
-        } catch (IOException e) {
+        }
+
+        catch (IOException e) {
 
             e.printStackTrace();
         }
 
     }
 
-    public void wins ( int win){
+    public void wins (int win){
 
         try {
 
             utils.write_string("WINS");
             utils.write_int32(win);
 
-        } catch (IOException e) {
+        }
+
+        catch (IOException e) {
 
             e.printStackTrace();
+
         }
 
     }
 
     public int turn(){
+
         int turn = random.nextInt(2);
-        System.out.println("És el torn de" + turn);
 
-
-
-        if(turn == 1){
-            return 1;
-        }
-
-        return 0;
+        return turn;
 
     }
 
+    public int readStrt(int jugador) {
+
+        String read = "";
+        int val = -1;
+
+        try {
+
+            read = utils.read_string();
+            //utils.read_blankSpace();
+            val = utils.read_int32();
+
+        }
+
+        catch(IOException e) {
+
+            error(4, "Error");
+
+            e.printStackTrace();
+
+        }
+
+        if (read.equals("STRT")) {
+
+            if (val <= 2 && val >= 0) {
+
+                return val;
+
+            }
+
+            else  {
+
+                error(4, "Error: valor de jugador incorrecte");
+
+            }
+
+        }
+
+        return -1;
+
+    }
+
+    public boolean readBett(int jugador) {
+
+        String read = "";
+
+        try {
+
+            read = utils.read_string();
+
+        }
+
+        catch(IOException e) {
+
+            error(4, "Error");
+            e.printStackTrace();
+
+        }
+
+        if (read.equals("BETT")) {
+
+            return true;
+
+        }
+
+        else {
+
+            return  false;
+
+        }
+
+    }
+
+    public ArrayList<Integer> readTake() {
+
+        String read = "";
+        String amm;
+        ArrayList<Integer> dicesPos = new ArrayList<>();
+
+        try {
+
+            read = utils.read_string();
+            //utils.read_blankSpace();
+            amm = utils.read_string();
+
+            for (int i = 0; i < Integer.valueOf(amm); i ++) {
+
+                dicesPos.add(Integer.valueOf(utils.read_string()));
+
+            }
+
+
+        }
+
+        catch(IOException e) {
+
+            error(4, "Error");
+
+            e.printStackTrace();
+
+        }
+
+        if(dicesPos.size() > 0) {
+
+            return dicesPos;
+
+        }
+
+        else {
+
+            dicesPos.add(-1);
+            return dicesPos;
+
+        }
+
+    }
+
+    public boolean readPass() {
+
+        String read = "";
+
+        try {
+
+            read = utils.read_string();
+
+        }
+
+        catch(IOException e) {
+
+            error(4, "Error");
+            e.printStackTrace();
+
+        }
+
+        if (read.equals("PASS")) {
+
+            return true;
+
+        }
+
+        else {
+
+            return  false;
+
+        }
+
+    }
+
+    public boolean readExit() {
+
+        String read = "";
+
+        try {
+
+            read = utils.read_string();
+
+        }
+
+        catch(IOException e) {
+
+            error(4, "Error");
+            e.printStackTrace();
+
+        }
+
+        if (read.equals("EXIT")) {
+
+            return true;
+
+        }
+
+        else {
+
+            return  false;
+
+        }
+
+    }
+
+    public void error(int hd, String txtError) {
+
+        try {
+
+            utils.write_string("ERRO");
+            utils.write_blankSpace();
+            utils.write_string_variable(hd, txtError);
+
+        }
+        catch(IOException e) {
+
+            e.printStackTrace();
+
+        }
+
+    }
 
 }
-
