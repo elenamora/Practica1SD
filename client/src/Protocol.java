@@ -83,6 +83,8 @@ public class Protocol{
             try {
                 utils.write_string("TAKE");
                 utils.write_blankSpace();
+                utils.write_int32(id);
+                utils.write_blankSpace();
                 utils.write_byte((byte) dados.size());
 
 
@@ -206,7 +208,7 @@ public class Protocol{
 
             play = utils.read_string();
             utils.read_blankSpace();
-            turn = utils.read_int32();
+            turn = (int)utils.read_char();
 
 
         }
@@ -237,6 +239,9 @@ public class Protocol{
         try {
 
             dice = utils.read_string();
+            utils.read_blankSpace();
+            utils.read_int32();
+
 
             for(int i = 0; i < 5; i++) {
 
@@ -275,6 +280,9 @@ public class Protocol{
 
         try {
             pnts = utils.read_string();
+            utils.read_blankSpace();
+            utils.read_int32();
+            utils.read_blankSpace();
             score = utils.read_int32();
         }
         catch(IOException e) {
@@ -296,18 +304,22 @@ public class Protocol{
     }
 
     /*** Funció que ens retorna si hem guanyat o no la partida ***/
-    public boolean read_win(){
+    public int read_win(){
         String win = "";
+        int ganador = -1;
 
         try {
             win = utils.read_string();
+            utils.read_blankSpace();
+            ganador = (int)utils.read_char();
+
         }
         catch(IOException e) {
             System.out.println("No hem pogut rebre guanyador del Servidor");
         }
 
         if (win.equals("WINS")){
-            return true;
+            return ganador;
         }
         else{
             try {
@@ -316,7 +328,7 @@ public class Protocol{
                 System.out.println("Hi ha hagut un error al rebre el cash");
             }
         }
-        return false;
+        return -1;
     }
 
     /*** Funció que ens indica que s'ha produit un error ***/

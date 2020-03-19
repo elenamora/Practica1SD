@@ -2,9 +2,8 @@
 import java.awt.*;
 import java.net.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 public class Joc {
@@ -103,70 +102,32 @@ public class Joc {
                 case TAKE:
                     System.out.println("Quins daus et vols quedar? (0(Cap) | 1 | 2 | 3 | 4 | 5 )");
                     int num = 0;
-                    boolean podemEscollir = false;
-                    int dauEscollit = sc.nextInt();
+                    int dauEscollit;
 
-                    ArrayList dausPossibles = daus;
 
-                    podemEscollir = escollir(podemEscollir);
-
-                    // Podem escollir tots els daus que volguem feta una sola tirada sempre i quan compleixin les normes
-                    while (podemEscollir && dauEscollit != 0) {
-                        if (dausGuardats == null && dausPossibles.get(dauEscollit - 1).equals(6)) {
-                            dausGuardats.add(6);
-                            dausPossibles.set(dauEscollit - 1, 0);
-                            System.out.println("Has escollit el dau" + dauEscollit + "amb valor 6");
-                            System.out.println("De moment tens els daus:" + dausGuardats);
-                        } else {
-                            System.out.println("El valor del dau que pots escollir ha de ser igual a 6");
-                        }
-                        if (dausGuardats.size() == 1 && dausPossibles.get(dauEscollit - 1).equals(5)) {
-                            dausGuardats.add(5);
-                            dausPossibles.set(dauEscollit - 1, 0);
-                            System.out.println("Has escollit els dau " + dauEscollit + "amb valor 5");
-                            System.out.println("De moment tens els daus:" + dausGuardats);
-                        } else {
-                            System.out.println("El valor del dau que pots escollir ha de ser igual a 5");
-                        }
-                        if (dausGuardats.size() == 2 && dausPossibles.get(dauEscollit - 1).equals(4)) {
-                            dausGuardats.add(4);
-                            dausPossibles.set(dauEscollit - 1, 0);
-                            System.out.println("Has escollit els dau " + dauEscollit + "amb valor 4");
-                            System.out.println("De moment tens els daus:" + dausGuardats);
-                        } else {
-                            System.out.println("El valor del dau que pots escollir ha de ser igual a 4");
-                        }
-
-                        if (dausGuardats.size() == 3) {
-                            for (int i = 0; i < dausPossibles.size(); i++) {
-                                if (i != 0)
-                                    dausGuardats.add(dausPossibles.get(i));
-                            }
-
-                            System.out.println("Has aconseguit 6-5-4! \n La teva puntuació és " + dausGuardats.get(3) + dausGuardats.get(4));
-                        }
-
-                        podemEscollir = escollir(false);
-                        if (podemEscollir)
+                    while (sc.hasNext()) {
+                        if (sc.hasNextInt()){
                             dauEscollit = sc.nextInt();
-                    }
-
-                    // Sempre i quan poguem tornar a tirar preguntem si volem tirar una altra vegada
-                    if (tirades > 0) {
-                        System.out.println("Vols tornar a tirar? (0 (sí), 1 (no), 2(sortir Joc)");
-                        int var2 = sc.nextInt();
-                        if (var2 == 0) {
-                            partida.setEstat(Partida.EstatPartida.ROLL);
-                        } else if (var2 == 1) {
-                            partida.setEstat(Partida.EstatPartida.PASS);
-                            break;
-                        } else if (var2 == 2) {
-                            partida.setEstat(Partida.EstatPartida.EXIT);
-                            break;
-                        } else {
-                            System.out.println("Variable incorrecta");
-                            break;
+                            if (dauEscollit == 0){
+                                System.out.println("Què vols fer? 0(ROLL), 1(PASS), 2(EXIT)");
+                                int opcio = sc.nextInt();
+                                if(opcio == 0)
+                                    partida.setEstat(Partida.EstatPartida.ROLL);
+                                else if(opcio == 1){
+                                    partida.setEstat(Partida.EstatPartida.PASS);
+                                    break;
+                                }
+                                else if(opcio == 2){
+                                    partida.setEstat(Partida.EstatPartida.EXIT);
+                                    break;
+                                }
+                            }
+                            else
+                                dausGuardats.add(daus.get(dauEscollit - 1));
                         }
+
+                        else
+                            sc.next();
                     }
 
                     protocol.take(num, dausGuardats);
@@ -199,7 +160,6 @@ public class Joc {
                     System.out.println("S'ha produit un Default");
                     break;
 
-
             }
 
         }
@@ -207,10 +167,13 @@ public class Joc {
     }
 
     public void guanyarPartida() throws IOException {
-        if (protocol.read_win()) {
+        if (protocol.read_win() == 0) {
             System.out.println("Has guanyat");
-        } else {
+        } else if(protocol.read_win() == 1){
             System.out.println("Has perdut");
+        }
+        else if(protocol.read_win() == 2) {
+            System.out.println("Empat");
         }
 
         System.out.println("La teva puntuació final és: " + protocol.read_pnts() + "punts");
@@ -220,27 +183,6 @@ public class Joc {
         }
     }
 
-
-    public boolean escollir(boolean escollir) {
-
-        for (int i = 0; i < daus.size(); i++) {
-            if (dausGuardats == null && i == 6) {
-                escollir = true;
-            }
-            if (dausGuardats.size() == 1 && i == 5) {
-                escollir = true;
-            }
-            if (dausGuardats.size() == 2 && i == 4) {
-                escollir = true;
-            }
-            if (dausGuardats.size() == 3) {
-                escollir = true;
-            }
-        }
-
-
-        return escollir;
-    }
 
     public void jugarAutomatic(int numPartides) throws IOException {
 
@@ -252,30 +194,50 @@ public class Joc {
                     case BETT:
                         if (puntuacio == 0) {
                             System.out.println("No tens diners per seguir jugant");
-                            partida.setEstat(Partida.EstatPartida.EXIT);
                             guanyarPartida();
                             protocol.desconnexio();
                             protocol.exit();
+
                         } else {
+
+                            System.out.println("jugar");
                             protocol.bett();
+
+                            System.out.println("El loot és " + protocol.read_loot());
+
                             puntuacio -= 1;
+
                             partida.setEstat(Partida.EstatPartida.ROLL);
                         }
 
+                        int comenca = protocol.read_play();
+
+                        while (comenca == -1){
+
+                            comenca  = protocol.read_play();
+
+                        }
+
+                        System.out.println("juga " + comenca);
+
                         break;
+
 
                     case ROLL:
                         if (tirades > 0) {
+
+                            System.out.println("estamos en roll");
+
                             daus = protocol.read_dice();
+
                             System.out.println("Els resultats de la tirada són:");
-                            for (int j = 0; j < daus.size(); j++) {
-                                System.out.println("Dau nº" + j + 1 + "és" + daus.get(j));
+                            for (int j = 1; j < daus.size() + 1; j++) {
+                                System.out.println("Dau nº " + j + " és " + daus.get(j-1));
                             }
                             partida.setEstat(Partida.EstatPartida.TAKE);
                         } else {
                             System.out.println("No ens queden més tirades per a fer. Ja hem fet 3.");
                             partida.setEstat(Partida.EstatPartida.PASS);
-                            break;
                         }
 
                         tirades -= 1;
@@ -286,46 +248,40 @@ public class Joc {
                         boolean podemEscollir = false;
 
                         ArrayList dausPossibles = daus;
+                        Collections.sort(dausPossibles);
 
-                        podemEscollir = escollir(podemEscollir);
-
-                        while (podemEscollir) {
-
-                            for (int j = 0; j < dausPossibles.size(); j++) {
-                                if (dausGuardats.size() == 0 && j == 6) {
-                                    dausGuardats.add(6);
-                                    dausPossibles.set(j, 0);
-                                    System.out.println("Has escollit el dau  amb valor 6");
-                                    System.out.println("De moment tens els daus:" + dausGuardats);
-                                } else if (dausGuardats.size() == 1 && j == 5) {
-                                    dausGuardats.add(5);
-                                    dausPossibles.set(j, 0);
-                                    System.out.println("Has escollit els dau amb valor 5");
-                                    System.out.println("De moment tens els daus:" + dausGuardats);
-                                } else if (dausGuardats.size() == 4 && j == 4) {
-                                    dausGuardats.add(4);
-                                    dausPossibles.set(j, 0);
-                                    System.out.println("Has escollit els dau amb valor 4");
-                                    System.out.println("De moment tens els daus:" + dausGuardats);
-                                } else if (dausGuardats.size() >= 3 && j != 0) {
-                                    dausGuardats.set(dausGuardats.size(), dausPossibles.get(j));
-                                    suma = (int) dausGuardats.get(3) + (int) dausGuardats.get(4);
-                                    if (suma > 7) {
-                                        partida.setEstat(Partida.EstatPartida.PASS);
-                                        protocol.take(id, dausGuardats);
-                                        break;
-                                    } else {
-                                        partida.setEstat(Partida.EstatPartida.ROLL);
-                                        break;
-                                    }
-                                }
+                        for (int j = 0; j < dausPossibles.size(); j++) {
+                            if (dausGuardats.size() == 0 && j == 6) {
+                                dausGuardats.add(dausPossibles.get(j));
+                                dausPossibles.set(j, 0);
                             }
 
-                            podemEscollir = escollir(false);
-                            if (podemEscollir)
-                                partida.setEstat(Partida.EstatPartida.TAKE);
+                            if (dausGuardats.size() == 1 && j == 5) {
+                                dausGuardats.add(dausPossibles.get(j));
+                                dausPossibles.set(j, 0);
+                            }
 
+                            if (dausGuardats.size() == 2 && j == 4) {
+                                dausGuardats.add(dausPossibles.get(j));
+                                dausPossibles.set(j, 0);
+                            }
+
+                            if (dausGuardats.size() == 3) {
+                                for (int k = 0; k < dausPossibles.size(); k++) {
+                                    if (k != 0)
+                                        dausGuardats.add(dausPossibles.get(k));
+                                }
+
+                                int num1 = (int)dausGuardats.get(3);
+                                int num2 = (int)dausGuardats.get(4);
+                                if(num1 + num2 > 7){
+                                    partida.setEstat(Partida.EstatPartida.PASS);
+                                    break;
+                                }
+
+                            }
                         }
+
 
                         protocol.take(id, dausGuardats);
                         partida.setEstat(Partida.EstatPartida.ROLL);
