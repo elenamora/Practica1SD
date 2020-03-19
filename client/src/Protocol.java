@@ -62,7 +62,10 @@ public class Protocol{
     public void bett(){
 
         try {
+
             utils.write_string("BETT");
+
+            System.out.println("Hola bett");
 
         } catch (IOException e) {
 
@@ -73,12 +76,15 @@ public class Protocol{
 
     public void take(int id, ArrayList dados) throws IOException {
 
+        System.out.println(dados.size());
+
         if (dados.size() > 0) {
 
             try {
                 utils.write_string("TAKE");
                 utils.write_blankSpace();
                 utils.write_byte((byte) dados.size());
+
 
                 for (int i = 0; i < dados.size(); i++) {
 
@@ -161,7 +167,7 @@ public class Protocol{
 
 
 
-    public boolean read_loot() {
+    public int read_loot() {
 
         String loot = "", blnc = "";
         int dinero = 0;
@@ -175,8 +181,10 @@ public class Protocol{
             System.out.println("No hem pogut rebre el loot");
         }
 
-        if (loot.equals("LOOT")){
-            return true;
+        if (loot.equals("LOOT")) {
+
+            return dinero;
+
         }
         else{
             try {
@@ -185,19 +193,22 @@ public class Protocol{
                 System.out.println("Hi ha hagut un error al rebre el loot");
             }
         }
-        return false;
+        return -1;
 
     }
 
     /*** Funció que retorna un int indicant qui comença primer ***/
     public int read_play() {
-        String play = "", blnc = "";
-        int turn = 0;
+        String play = "";
+        int turn = -1;
 
         try {
+
             play = utils.read_string();
-            blnc = utils.read_blankSpace();
+            utils.read_blankSpace();
             turn = utils.read_int32();
+
+
         }
         catch(IOException e) {
             System.out.println("No hem pogut rebre l'ordre de tirada dels jugadors");
@@ -221,16 +232,18 @@ public class Protocol{
     public ArrayList read_dice() throws IOException {
 
         String dice = "";
-        String blnc;
         ArrayList daus = new ArrayList();
 
         try {
+
             dice = utils.read_string();
-            blnc = utils.read_blankSpace();
 
             for(int i = 0; i < 5; i++) {
-                blnc = utils.read_blankSpace();
-                daus.set(i, utils.read_int32());
+
+                utils.read_blankSpace();
+
+                daus.add((int) utils.read_char());
+
             }
 
         }

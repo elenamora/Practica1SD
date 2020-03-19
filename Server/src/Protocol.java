@@ -23,7 +23,7 @@ public class Protocol {
 
         singlePlayer = Integer.parseInt(args[1]);
 
-        if ( singlePlayer == 2){
+        if (singlePlayer == 2) {
 
             serverSocket1 = new ServerSocket(portServidor);
             serverSocket2 = new ServerSocket(portServidor + 1);
@@ -190,10 +190,12 @@ public class Protocol {
 
     public void play (int jugadorActual, int turno){
 
+        System.out.println("Li toca a " + turno);
+
         try {
 
             utilsL[jugadorActual].write_string("PLAY");
-            utilsL[jugadorActual].read_blankSpace();
+            utilsL[jugadorActual].write_blankSpace();
             utilsL[jugadorActual].write_int32(turno);
 
         }
@@ -214,8 +216,10 @@ public class Protocol {
             for (int i = 0; i < dices.length; i++) {
 
                 utilsL[jugadorActual].write_blankSpace();
-                utilsL[jugadorActual].write_string(Integer.toString(dices[i]));
 
+                System.out.println(dices[i]);
+
+                utilsL[jugadorActual].write_char((char) dices[i]);
 
             }
 
@@ -278,9 +282,9 @@ public class Protocol {
 
         try {
 
-            read = utilsL[0].read_string();
-            utilsL[0].read_blankSpace();
-            val = utilsL[0].read_int32();
+            read = utilsL[jugadorActual].read_string();
+            utilsL[jugadorActual].read_blankSpace();
+            val = utilsL[jugadorActual].read_int32();
 
             System.out.println(Integer.toString(val));
 
@@ -307,7 +311,7 @@ public class Protocol {
 
     }
 
-    public boolean readBett(int jugadorActual) {
+    public int readBett(int jugadorActual) {
 
         String read = "";
 
@@ -315,24 +319,26 @@ public class Protocol {
 
             read = utilsL[jugadorActual].read_string();
 
+            System.out.println(read);
+
         }
 
         catch(IOException e) {
 
-            error(jugadorActual,4, "Error");
             e.printStackTrace();
 
         }
 
+
         if (read.equals("BETT")) {
 
-            return true;
+            return 1;
 
         }
 
         else {
 
-            return  false;
+            return  0;
 
         }
 
@@ -340,20 +346,18 @@ public class Protocol {
 
     public ArrayList<Integer> readTake(int jugadorActual) {
 
-        String read = "";
-        String amm;
+        int amm;
         ArrayList<Integer> dicesPos = new ArrayList<>();
 
         try {
 
-            read = utilsL[jugadorActual].read_string();
             utilsL[jugadorActual].read_blankSpace();
-            amm = utilsL[jugadorActual].read_string();
+            amm = (int)utilsL[jugadorActual].read_byte();
 
-            for (int i = 0; i < Integer.valueOf(amm); i ++) {
+            for (int i = 0; i < amm; i ++) {
 
                 utilsL[jugadorActual].read_blankSpace();
-                dicesPos.add(Integer.valueOf(utilsL[jugadorActual].read_string()));
+                dicesPos.add(Integer.valueOf(utilsL[jugadorActual].read_byte()));
 
             }
 
@@ -378,6 +382,50 @@ public class Protocol {
 
             dicesPos.add(-1);
             return dicesPos;
+
+        }
+
+    }
+
+    public int readElement(int jugadorActual) {
+
+        String element = "x";
+
+        try {
+
+            element  = utilsL[jugadorActual].read_string();
+
+            System.out.println("He leido: " + element + " NADA");
+
+        }
+
+        catch (IOException e) {
+
+            e.printStackTrace();
+
+        }
+
+        if (element.equals("TAKE")) {
+
+            return 0;
+
+        }
+
+        else if (element.equals("PASS")) {
+
+            return 1;
+
+        }
+
+        else if (element.equals("EXIT")) {
+
+            return 2;
+
+        }
+
+        else {
+
+            return -1;
 
         }
 

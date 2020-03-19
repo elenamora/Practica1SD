@@ -1,10 +1,9 @@
 
-
 public class Partida {
 
     private boolean partida = false;
     private EstatPartida estat;
-    public static enum EstatPartida{START, BETT, ROLL, TAKE,  PASS, EXIT}
+    public static enum EstatPartida{START, BETT, ROLL, PASS, DEAL, EXIT, TAKE}
 
     public Partida(){
         this.partida = true;

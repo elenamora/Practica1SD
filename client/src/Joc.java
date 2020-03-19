@@ -59,24 +59,37 @@ public class Joc {
 
                         System.out.println("jugar");
                         protocol.bett();
-                        protocol.read_loot();
+
+                        System.out.println("El loot és " + protocol.read_loot());
+
                         puntuacio -= 1;
+
                         partida.setEstat(Partida.EstatPartida.ROLL);
                     }
 
-                    while (!protocol.read_loot() && protocol.read_play() == -1){
+                    int comenca = protocol.read_play();
+
+                    while (comenca == -1){
+
+                        comenca  = protocol.read_play();
 
                     }
+
+                    System.out.println("juga" + comenca);
 
 
                     break;
 
                 case ROLL:
                     if (tirades > 0) {
+
+                        System.out.println("estamos en roll");
+
                         daus = protocol.read_dice();
+
                         System.out.println("Els resultats de la tirada són:");
-                        for (int i = 0; i < daus.size(); i++) {
-                            System.out.println("Dau nº" + i + 1 + "és" + daus.get(i));
+                        for (int i = 1; i < daus.size() + 1; i++) {
+                            System.out.println("Dau nº " + i + " és " + daus.get(i-1));
                         }
                         partida.setEstat(Partida.EstatPartida.TAKE);
                     } else {
@@ -146,10 +159,13 @@ public class Joc {
                             partida.setEstat(Partida.EstatPartida.ROLL);
                         } else if (var2 == 1) {
                             partida.setEstat(Partida.EstatPartida.PASS);
+                            break;
                         } else if (var2 == 2) {
                             partida.setEstat(Partida.EstatPartida.EXIT);
+                            break;
                         } else {
                             System.out.println("Variable incorrecta");
+                            break;
                         }
                     }
 
@@ -168,10 +184,11 @@ public class Joc {
 
                     System.out.println("Vols abandonar el joc? (0 (sí) | 1 (no))");
                     if (sc.nextInt() == 0) {
-                        guanyarPartida();
                         partida.setPartida(false);
-                        protocol.desconnexio();
                         protocol.exit();
+                        //protocol.desconnexio();
+                        protocol.read_play();
+
                     } else {
                         partida.setEstat(Partida.EstatPartida.BETT);
                     }

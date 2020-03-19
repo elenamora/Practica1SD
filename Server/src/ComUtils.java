@@ -188,4 +188,27 @@ public class ComUtils {
         dataOutputStream.write(bytes, 0, 4);
 
     }
+
+    public char read_char() throws IOException {
+
+        char result;
+        byte[] bStr;
+        char[] cStr = new char[1];
+
+        bStr = read_bytes(1);
+        cStr[0] = (char) bStr[0];
+        result = cStr[0];
+        return result;
+
+    }
+
+    public void write_char(char a) throws IOException {
+
+        byte bStr[] = new byte[1];
+
+        bStr[0] = (byte) a;
+
+        dataOutputStream.write(bStr, 0, 1);
+
+    }
 }

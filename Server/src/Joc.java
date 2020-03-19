@@ -65,6 +65,10 @@ public class Joc {
 
                 if (state == "EXIT") {
 
+
+
+                    System.out.println("Hemos salido del juego");
+
                     jugador1 = null;
                     keePlaying = false;
 
@@ -88,7 +92,7 @@ public class Joc {
                 protocol.cash(0, jugadorList[0].getDinero());
                 protocol.cash(1, jugadorList[1].getDinero());
 
-                while(!protocol.readBett(0) && !protocol.readBett(1)) {
+                while(protocol.readBett(0) == 0 && protocol.readBett(1) == 0) {
 
 
 
@@ -142,13 +146,6 @@ public class Joc {
 
                     }
 
-                    if(protocol.readExit(0)) {
-
-                        state = "EXIT";
-
-                    }
-
-
                 } while(playing || turn < 3);
 
                 protocol.pnts(0, jugadorList[0].getPuntuacion());
@@ -163,7 +160,11 @@ public class Joc {
 
         }
 
-        sendPuntuacio(0);
+        if (!state.equals("EXIT")) {
+
+            sendPuntuacio(0);
+
+        }
 
     }
 
@@ -285,11 +286,15 @@ public class Joc {
 
         protocol.cash(0, jugadorList[0].getDinero());
 
-        while (!protocol.readBett(0)) {
+        int readedB = protocol.readBett(0);
 
+        while (readedB == 0) {
 
+            readedB  = protocol.readBett(0);
 
         }
+
+        System.out.println("Hem sortit del loop");
 
         jugadorList[0].setDinero(-1);
 
@@ -299,12 +304,11 @@ public class Joc {
 
         pTurn = protocol.turn();
 
+        pTurn = 0;
+
         protocol.play(0, pTurn);
 
         state = "DICE";
-
-        System.out.println("Hemos terminado el bett");
-
 
     }
 
@@ -313,7 +317,7 @@ public class Joc {
         protocol.cash(0, jugadorList[0].getDinero());
         protocol.cash(1, jugadorList[1].getDinero());
 
-        while(!protocol.readBett(0) && !protocol.readBett(1)) {
+        while(protocol.readBett(0) == 0 && protocol.readBett(1) == 0) {
 
 
 
@@ -352,31 +356,47 @@ public class Joc {
         jugadorList[jugadorActual].getNumber();
         protocol.dice(jugadorActual, jugadorList[jugadorActual].getDiceList());
 
+        System.out.println("estoy aqui");
+
         while(true) {
 
-            d = protocol.readTake(jugadorActual);
+            System.out.println("estoy en el bucle");
 
-            if(d.get(0) != -1) {
+            int accion = protocol.readElement(jugadorActual);
 
+            System.out.println(accion);
+
+            System.out.println("He hecho algo :D");
+
+            if (accion == 0) {
+
+                d = protocol.readTake(0);
                 state = "TAKE";
+                System.out.println("Vamos a take!");
+
+                for (int i = 0; i < d.size(); i ++) {
+
+                    System.out.println(d.get(i));
+
+                }
+
                 break;
 
             }
 
-            else if(protocol.readPass(jugadorActual)) {
+            else if (accion == 1) {
 
                 state = "PASS";
                 break;
 
             }
 
-            else if(protocol.readExit(jugadorActual)) {
+            else if (accion == 2) {
 
                 state = "EXIT";
                 break;
 
             }
-
 
         }
 
@@ -424,6 +444,10 @@ public class Joc {
 
     private void exit() {
 
+        notPlayed1 = true;
+        notPlayed2 = true;
+        playing = false;
+        turn = 4;
         System.out.println("USUARI VOL FINALITZAR KEKW");
 
     }

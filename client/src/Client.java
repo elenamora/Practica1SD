@@ -1,6 +1,5 @@
 
 import java.io.IOException;
-import java.net.*;
 import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 
@@ -8,7 +7,9 @@ public class Client{
 
     public static void main(String[] args2) throws IOException, TimeoutException {
 
+        //String[] args = {"25.71.79.215", "5000", "0"};
         String[] args = {"25.71.79.215", "5000", "0"};
+
 
         String nomMaquina;
         int numPort, mode = 0, id ;
