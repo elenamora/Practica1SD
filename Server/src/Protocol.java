@@ -54,64 +54,18 @@ public class Protocol {
 
     }
 
-    /*
-    public void xd() {
+    public void take (int jugadorActual, int id, ArrayList dados){
 
-        try{
-
-            serverSocket = new ServerSocket(portServidor);
-            System.out.println("Servidor Socket preparat en el port"+ portServidor);
-
-            while (true){
-                System.out.println("Esperant una connexió d'un client");
-
-                socket = serverSocket.accept();
-                System.out.println("Connexió acceptada d'un client");
-
-
-            }
-
-        }catch (IOException ex){
-            System.out.println("No s'ha pogut crear el servidor");
-        }finally {
-            try {
-                if(serverSocket != null) serverSocket.close();
-            }catch (IOException ex){
-                System.out.println("No s'ha pogut establir connexió amb el client");
-            }
-        }
-
-    }
-
-    public void connexio(String nomMaquina, int numPort) {
-
-        try {
-
-            maquinaServidora = InetAddress.getByName(nomMaquina);
-
-            socket = new Socket(maquinaServidora, numPort);
-
-            utils = new ComUtils(socket);
-
-        } catch (IOException e) {
-
-            System.out.println("Error de connexió");
-        }
-    }
-
-     */
-
-    public void take (int jugadorActual, int cant, ArrayList dados){
-
-        if (cant > 0) {
+        if (dados.size() > 0) {
 
             try {
 
                 utilsL[jugadorActual].write_string("TAKE");
                 utilsL[jugadorActual].write_blankSpace();
-                utilsL[jugadorActual].write_byte((byte) cant);
+                utilsL[jugadorActual].write_int32(id);
+                utilsL[jugadorActual].write_byte((byte) dados.size());
 
-                for (int i = 0; i < cant; i ++) {
+                for (int i = 0; i < dados.size(); i ++) {
 
                     utilsL[jugadorActual].write_blankSpace();
                     utilsL[jugadorActual].write_byte((byte) dados.get(i));
@@ -130,7 +84,7 @@ public class Protocol {
 
                 utilsL[jugadorActual].write_string("TAKE");
                 utilsL[jugadorActual].write_blankSpace();
-                utilsL[jugadorActual].write_byte((byte) cant);
+                utilsL[jugadorActual].write_byte((byte) dados.size());
 
             } catch (IOException e) {
 
@@ -190,13 +144,11 @@ public class Protocol {
 
     public void play (int jugadorActual, int turno){
 
-        System.out.println("Li toca a " + turno);
-
         try {
 
             utilsL[jugadorActual].write_string("PLAY");
             utilsL[jugadorActual].write_blankSpace();
-            utilsL[jugadorActual].write_int32(turno);
+            utilsL[jugadorActual].write_char((char)turno);
 
         }
 
@@ -207,11 +159,14 @@ public class Protocol {
 
     }
 
-    public void dice (int jugadorActual, int[] dices){
+    public void dice (int jugadorActual, int id, int[] dices){
 
         try {
 
+
             utilsL[jugadorActual].write_string("DICE");
+            utilsL[jugadorActual].write_blankSpace();
+            utilsL[jugadorActual].write_int32(id);
 
             for (int i = 0; i < dices.length; i++) {
 
@@ -232,11 +187,13 @@ public class Protocol {
 
     }
 
-    public void pnts (int jugadorActual, int score){
+    public void pnts (int jugadorActual, int id, int score){
 
         try {
 
             utilsL[jugadorActual].write_string("PNTS");
+            utilsL[jugadorActual].write_blankSpace();
+            utilsL[jugadorActual].write_int32(id);
             utilsL[jugadorActual].write_blankSpace();
             utilsL[jugadorActual].write_int32(score);
 
@@ -277,18 +234,14 @@ public class Protocol {
 
     public int readStrt(int jugadorActual) {
 
-        String read = "";
         int val = -1;
 
         try {
 
-            read = utilsL[jugadorActual].read_string();
+            utilsL[jugadorActual].read_string();
             utilsL[jugadorActual].read_blankSpace();
             val = utilsL[jugadorActual].read_int32();
 
-            System.out.println(Integer.toString(val));
-
-
         }
 
         catch(IOException e) {
@@ -297,50 +250,7 @@ public class Protocol {
 
         }
 
-        if (read.equals("STRT")) {
-
-            System.out.println("Holax2");
-
-            return val;
-
-
-
-        }
-
-        return -1;
-
-    }
-
-    public int readBett(int jugadorActual) {
-
-        String read = "";
-
-        try {
-
-            read = utilsL[jugadorActual].read_string();
-
-            System.out.println(read);
-
-        }
-
-        catch(IOException e) {
-
-            e.printStackTrace();
-
-        }
-
-
-        if (read.equals("BETT")) {
-
-            return 1;
-
-        }
-
-        else {
-
-            return  0;
-
-        }
+        return val;
 
     }
 
@@ -352,12 +262,17 @@ public class Protocol {
         try {
 
             utilsL[jugadorActual].read_blankSpace();
+            utilsL[jugadorActual].read_int32();
+            utilsL[jugadorActual].read_blankSpace();
             amm = (int)utilsL[jugadorActual].read_byte();
+
+            System.out.println(amm);
 
             for (int i = 0; i < amm; i ++) {
 
                 utilsL[jugadorActual].read_blankSpace();
-                dicesPos.add(Integer.valueOf(utilsL[jugadorActual].read_byte()));
+
+                //dicesPos.add(Integer.valueOf(utilsL[jugadorActual].read_byte()));
 
             }
 
@@ -387,15 +302,13 @@ public class Protocol {
 
     }
 
-    public int readElement(int jugadorActual) {
+    public String readElement(int jugadorActual) {
 
-        String element = "x";
+        String element = "";
 
         try {
 
             element  = utilsL[jugadorActual].read_string();
-
-            System.out.println("He leido: " + element + " NADA");
 
         }
 
@@ -405,91 +318,7 @@ public class Protocol {
 
         }
 
-        if (element.equals("TAKE")) {
-
-            return 0;
-
-        }
-
-        else if (element.equals("PASS")) {
-
-            return 1;
-
-        }
-
-        else if (element.equals("EXIT")) {
-
-            return 2;
-
-        }
-
-        else {
-
-            return -1;
-
-        }
-
-    }
-
-    public boolean readPass(int jugadorActual) {
-
-        String read = "";
-
-        try {
-
-            read = utilsL[jugadorActual].read_string();
-
-        }
-
-        catch(IOException e) {
-
-            error(jugadorActual,4, "Error");
-            e.printStackTrace();
-
-        }
-
-        if (read.equals("PASS")) {
-
-            return true;
-
-        }
-
-        else {
-
-            return  false;
-
-        }
-
-    }
-
-    public boolean readExit(int jugadorActual) {
-
-        String read = "";
-
-        try {
-
-            read = utilsL[jugadorActual].read_string();
-
-        }
-
-        catch(IOException e) {
-
-            error(jugadorActual,4, "Error");
-            e.printStackTrace();
-
-        }
-
-        if (read.equals("EXIT")) {
-
-            return true;
-
-        }
-
-        else {
-
-            return  false;
-
-        }
+        return element;
 
     }
 

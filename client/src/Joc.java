@@ -12,17 +12,21 @@ public class Joc {
     private Protocol protocol;
     private Random r = new Random();
     private Scanner sc;
-    private int mode, id;
+    private int mode, id, num;
     private int puntuacio = -1;
     private ArrayList daus = new ArrayList();
     public ArrayList dausGuardats = new ArrayList();
     public int tirades = 3;
+    private boolean partidaAcabada, jugat1, jugat2;
 
-    static private String[] menu = {"Tirar Daus", "Guardar daus", "Passar torn", "Sortir de l'aplicació"};
 
-    public Joc(Protocol p, int mode, int id) throws IOException, TimeoutException {
+    public Joc(Protocol p, int mode, int id, int num) throws IOException {
 
         this.id = id;
+        this.num = num;
+        this.partidaAcabada = false;
+        this.jugat1 = false;
+        this.jugat2 = false;
         this.partida = new Partida();
         this.protocol = p;
         this.mode = mode;
@@ -30,63 +34,65 @@ public class Joc {
 
         puntuacio = protocol.read_cash();
 
-        while (puntuacio == -1){
+        System.out.println("El teu CASH és de: " + puntuacio);
 
-            puntuacio = protocol.read_cash();
-
-        }
-
-        System.out.println(Integer.toString(puntuacio));
-
-        partida.setEstat(Partida.EstatPartida.BETT);
+        bett();
 
     }
+
+    public void bett() throws IOException {
+        if (puntuacio == 0) {
+            System.out.println("No tens diners per seguir jugant");
+            guanyarPartida();
+            protocol.desconnexio();
+            protocol.exit();
+
+        } else {
+
+            protocol.bett();
+            System.out.println("Hem fet la BETT");
+
+            System.out.println("El LOOT és " + protocol.read_loot());
+
+            puntuacio -= 1;
+
+            partida.setEstat(Partida.EstatPartida.ROLL);
+
+            turn();
+        }
+
+    }
+
+    public void turn() throws IOException {
+        int comenca = protocol.read_play();
+
+        if(comenca == 0){
+            System.out.println("És el teu torn");
+            if(mode == 1)
+                jugarAutomatic(num);
+            else
+                jugar();
+
+        }
+        else{
+            System.out.println("És el torn del contrincant");
+            jugaIA();
+        }
+    }
+
 
     public void jugar() throws IOException {
 
         while (partida.getPartida()) {
 
             switch (partida.getEstat()) {
-                case BETT:
-                    if (puntuacio == 0) {
-                        System.out.println("No tens diners per seguir jugant");
-                        guanyarPartida();
-                        protocol.desconnexio();
-                        protocol.exit();
-
-                    } else {
-
-                        System.out.println("jugar");
-                        protocol.bett();
-
-                        System.out.println("El loot és " + protocol.read_loot());
-
-                        puntuacio -= 1;
-
-                        partida.setEstat(Partida.EstatPartida.ROLL);
-                    }
-
-                    int comenca = protocol.read_play();
-
-                    while (comenca == -1){
-
-                        comenca  = protocol.read_play();
-
-                    }
-
-                    System.out.println("juga" + comenca);
-
-
-                    break;
 
                 case ROLL:
                     if (tirades > 0) {
 
-                        System.out.println("estamos en roll");
-
                         daus = protocol.read_dice();
 
-                        System.out.println("Els resultats de la tirada són:");
+                        System.out.println("\nEls resultats de la tirada són:");
                         for (int i = 1; i < daus.size() + 1; i++) {
                             System.out.println("Dau nº " + i + " és " + daus.get(i-1));
                         }
@@ -100,37 +106,53 @@ public class Joc {
                     break;
 
                 case TAKE:
-                    System.out.println("Quins daus et vols quedar? (0(Cap) | 1 | 2 | 3 | 4 | 5 )");
-                    int num = 0;
-                    int dauEscollit;
+                    int dauEscollit, num;
+                    List<Integer> escollits = new ArrayList<Integer>();
 
 
-                    while (sc.hasNext()) {
-                        if (sc.hasNextInt()){
-                            dauEscollit = sc.nextInt();
-                            if (dauEscollit == 0){
-                                System.out.println("Què vols fer? 0(ROLL), 1(PASS), 2(EXIT)");
-                                int opcio = sc.nextInt();
-                                if(opcio == 0)
-                                    partida.setEstat(Partida.EstatPartida.ROLL);
-                                else if(opcio == 1){
-                                    partida.setEstat(Partida.EstatPartida.PASS);
-                                    break;
-                                }
-                                else if(opcio == 2){
-                                    partida.setEstat(Partida.EstatPartida.EXIT);
-                                    break;
-                                }
-                            }
-                            else
-                                dausGuardats.add(daus.get(dauEscollit - 1));
+                    System.out.println("Quants daus et vols quedar?");
+                    int cantitat = sc.nextInt();
+
+                    if(cantitat == 0){
+                        System.out.println("Què vols fer? 0(ROLL), 1(PASS), 2(EXIT)");
+                        int opcio = sc.nextInt();
+                        if(opcio == 0) {
+                            partida.setEstat(Partida.EstatPartida.ROLL);
+                            break;
                         }
+                        else if(opcio == 1){
+                            partida.setEstat(Partida.EstatPartida.PASS);
+                            break;
+                        }
+                        else if(opcio == 2){
+                            partida.setEstat(Partida.EstatPartida.EXIT);
+                            break;
+                        }
+                    }
+                    else if(cantitat > 5){
+                        System.out.println("Com a màxim et pots quedar 5 daus");
+                        break;
+                    }
+                    else{
+                        System.out.println("Quins daus et vols quedar? (1 | 2 | 3 | 4 | 5 )");
+                        for(int i = 0; i < cantitat; i++){
+                            dauEscollit = sc.nextInt();
 
-                        else
-                            sc.next();
+                            if(escollits.contains(dauEscollit)){
+                                System.out.println("Ja has escollit aquest dau. Tria un altre");
+                                i--;
+                            }
+                            else{
+                                escollits.add(dauEscollit);
+                                dausGuardats.add(daus.get(dauEscollit - 1));
+                            }
+                        }
                     }
 
-                    protocol.take(num, dausGuardats);
+
+                    System.out.println("Els daus que has guardat són: " + dausGuardats);
+
+                    protocol.take(id, dausGuardats);
                     partida.setEstat(Partida.EstatPartida.ROLL);
 
                     break;
@@ -164,23 +186,6 @@ public class Joc {
 
         }
 
-    }
-
-    public void guanyarPartida() throws IOException {
-        if (protocol.read_win() == 0) {
-            System.out.println("Has guanyat");
-        } else if(protocol.read_win() == 1){
-            System.out.println("Has perdut");
-        }
-        else if(protocol.read_win() == 2) {
-            System.out.println("Empat");
-        }
-
-        System.out.println("La teva puntuació final és: " + protocol.read_pnts() + "punts");
-
-        while (protocol.read_cash() == -1){
-
-        }
     }
 
 
@@ -309,6 +314,51 @@ public class Joc {
 
                 }
             }
+        }
+    }
+
+
+    public void jugaIA(){
+        while (partida.getPartida()) {
+
+            switch (partida.getEstat()) {
+
+                case TAKE:
+
+                    protocol.read_take();
+                    break;
+
+                case PASS:
+                    protocol.read_pass();
+                    break;
+
+                case EXIT:
+
+                    break;
+
+                default:
+                    System.out.println("S'ha produit un Default");
+                    break;
+
+            }
+
+        }
+    }
+
+    public void guanyarPartida() throws IOException {
+        if (protocol.read_win() == 0) {
+            System.out.println("Has guanyat");
+        } else if(protocol.read_win() == 1){
+            System.out.println("Has perdut");
+        }
+        else if(protocol.read_win() == 2) {
+            System.out.println("Empat");
+        }
+
+        System.out.println("La teva puntuació final és: " + protocol.read_pnts() + "punts");
+
+        while (protocol.read_cash() == -1){
+
         }
     }
 

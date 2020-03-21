@@ -8,7 +8,6 @@ public class Protocol{
     InetAddress maquinaServidora;
     Socket socket;
     ComUtils utils;
-    Scanner sc;
 
 
     /*** Funció que ens permet conncetar-nos a un socket ***/
@@ -44,8 +43,6 @@ public class Protocol{
     /*** Funció que ens permet iniciar la partida on hem d'indicar el nostre id com a jugadors ***/
     public void start(int id) {
 
-        System.out.println("Hola");
-
         try {
 
             utils.write_string("STRT");
@@ -65,8 +62,6 @@ public class Protocol{
 
             utils.write_string("BETT");
 
-            System.out.println("Hola bett");
-
         } catch (IOException e) {
 
             System.out.println("No s'ha pogut fer l'aposta inicial");
@@ -75,8 +70,6 @@ public class Protocol{
     }
 
     public void take(int id, ArrayList dados) throws IOException {
-
-        System.out.println(dados.size());
 
         if (dados.size() > 0) {
 
@@ -102,7 +95,11 @@ public class Protocol{
 
             try {
 
+                System.out.println("HOLAAAAA");
+
                 utils.write_string("TAKE");
+                utils.write_blankSpace();
+                utils.write_int32(id);
                 utils.write_blankSpace();
                 utils.write_byte((byte) dados.size());
 
@@ -142,8 +139,6 @@ public class Protocol{
 
     /*** Funció que rep el cash que ens envia el Servidor ***/
     public int read_cash() throws IOException{
-
-        System.out.println("Ahora estoy en cash!");
 
         String cash = "";
         int val = -1;
@@ -239,6 +234,7 @@ public class Protocol{
         try {
 
             dice = utils.read_string();
+            System.out.println(dice);
             utils.read_blankSpace();
             utils.read_int32();
 
@@ -271,6 +267,84 @@ public class Protocol{
         return daus;
     }
 
+    /*** Funció que retorna el Take del contrincant ***/
+    public ArrayList<Integer> read_take() {
+
+        String take = "";
+        int amm;
+        ArrayList<Integer> dicesPos = new ArrayList<>();
+
+        try {
+            take = utils.read_string();
+            utils.read_blankSpace();
+            utils.read_int32();
+            utils.read_blankSpace();
+            amm = (int)utils.read_byte();
+
+            System.out.println(amm);
+
+            for (int i = 0; i < amm; i ++) {
+
+                utils.read_blankSpace();
+
+                //dicesPos.add(Integer.valueOf(utils.read_byte()));
+            }
+        }
+        catch(IOException e) {
+            System.out.println("No hem pogut rebre el TAKE del contrincant");
+        }
+
+        if(take.equals("TAKE")){
+            if(dicesPos.size() > 0) {
+                return dicesPos;
+
+            }
+            else {
+                dicesPos.add(-1);
+                return dicesPos;
+            }
+        }
+
+        else{
+            try {
+                error();
+            } catch (IOException e){
+                System.out.println("Hi ha hagut un error al rebre el TAKE");
+            }
+        }
+
+        return dicesPos;
+    }
+
+
+
+    /*** Funció que ens indica si el contrincant ha passat ***/
+    public boolean read_pass() {
+
+            String pass = "";
+
+            try {
+                pass = utils.read_string();
+                utils.read_blankSpace();
+                utils.read_int32();
+            }
+            catch(IOException e) {
+                System.out.println("No hem pogut rebre l'acció del contrincant");
+            }
+
+            if (pass.equals("PASS")){
+                return true;
+            }
+            else{
+                try {
+                    error();
+                } catch (IOException e){
+                    System.out.println("Hi ha hagut un error al rrebre el PASS");
+                }
+            }
+
+        return false;
+    }
 
     /*** Funció que retorna la puntuació obtinguda pel jugador ***/
     public int read_pnts() {

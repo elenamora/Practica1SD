@@ -43,16 +43,15 @@ public class Client{
 
         protocol.start(id);
 
-        Joc joc = new Joc(protocol, mode, id);
 
-        if (mode == 0 || mode == 2){
-            joc.jugar();
-        }
-        else if(mode == 1){
+
+        int num = 0;
+        if(mode == 1){
             System.out.println("Quantes partides vols jugar?");
-            int num = sc.nextInt();
-            joc.jugarAutomatic(num);
+            num = sc.nextInt();
         }
+
+        Joc joc = new Joc(protocol, mode, id, num);
 
     }
 }
