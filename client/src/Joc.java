@@ -16,6 +16,7 @@ public class Joc {
     private int puntuacio = -1;
     private ArrayList daus = new ArrayList();
     public ArrayList dausGuardats = new ArrayList();
+    private ArrayList dausMostrar = new ArrayList();
     public int tirades = 3;
     private boolean jugat1, jugat2;
 
@@ -105,9 +106,8 @@ public class Joc {
                     break;
 
                 case TAKE:
-                    int dauEscollit, num;
+                    int dauEscollit = 0, num;
                     List<Integer> escollits = new ArrayList<Integer>();
-
 
                     System.out.println("Quants daus et vols quedar?");
                     int cantitat = sc.nextInt();
@@ -143,13 +143,14 @@ public class Joc {
                             }
                             else{
                                 escollits.add(dauEscollit);
-                                dausGuardats.add(daus.get(dauEscollit - 1));
+                                dausGuardats.add(dauEscollit - 1);
+                                dausMostrar.add(daus.get(dauEscollit - 1));
                             }
                         }
                     }
 
 
-                    System.out.println("Els daus que has guardat són: " + dausGuardats);
+                    System.out.println("Els daus que has guardat són: " + dausMostrar);
 
                     protocol.take(id, dausGuardats);
                     partida.setEstat(Partida.EstatPartida.ROLL);
@@ -164,6 +165,19 @@ public class Joc {
                     if (jugat1 && jugat2){
                         System.out.println("S'ha acabat la partida");
                         guanyarPartida();
+
+                        System.out.println("Vols jugar una altra partida? 0(sí), 1(exit)");
+                        int n = sc.nextInt();
+                        if(n == 0){
+                            jugat1 = false;
+                            jugat2 = false;
+                            bett();
+                        }
+                        else if(n == 1){
+                            partida.setEstat(Partida.EstatPartida.EXIT);
+                            break;
+                        }
+
                     }
                     else if(!jugat2){
                         System.out.println("Ara és el torn del teu contrincant");
@@ -178,11 +192,14 @@ public class Joc {
                     if (sc.nextInt() == 0) {
                         partida.setPartida(false);
                         protocol.exit();
-                        //protocol.desconnexio();
+                        protocol.desconnexio();
                         protocol.read_play();
 
                     } else {
+                        jugat2 = true;
+                        jugat1 = true;
                         partida.setEstat(Partida.EstatPartida.BETT);
+                        bett();
                     }
 
                     break;

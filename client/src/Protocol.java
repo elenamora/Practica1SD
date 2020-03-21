@@ -84,7 +84,8 @@ public class Protocol{
                 for (int i = 0; i < dados.size(); i++) {
 
                     utils.write_blankSpace();
-                    utils.write_byte((byte) dados.get(i));
+                    int dau = (int) dados.get(i);
+                    utils.write_byte((byte) dau);
 
                 }
             } catch (IOException e) {
@@ -94,8 +95,6 @@ public class Protocol{
         }else {
 
             try {
-
-                System.out.println("HOLAAAAA");
 
                 utils.write_string("TAKE");
                 utils.write_blankSpace();
