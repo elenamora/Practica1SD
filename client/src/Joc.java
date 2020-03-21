@@ -116,6 +116,7 @@ public class Joc {
                         System.out.println("Què vols fer? 0(ROLL), 1(PASS), 2(EXIT)");
                         int opcio = sc.nextInt();
                         if(opcio == 0) {
+                            protocol.take(id, dausGuardats);
                             partida.setEstat(Partida.EstatPartida.ROLL);
                             break;
                         }
@@ -180,6 +181,8 @@ public class Joc {
 
                     }
                     else if(!jugat2){
+
+                        System.out.println("Tinc " + protocol.read_pnts());
                         System.out.println("Ara és el torn del teu contrincant");
                         jugaIA();
                     }
@@ -322,6 +325,18 @@ public class Joc {
                     case PASS:
                         protocol.pass(id);
                         partida.setEstat(Partida.EstatPartida.PASS);
+                        jugat1 = true;
+
+                        if (jugat1 && jugat2){
+                            System.out.println("S'ha acabat la partida");
+                            guanyarPartida();
+                            bett();
+
+                        }
+                        else if(!jugat2){
+                            System.out.println("Ara és el torn del teu contrincant");
+                            jugaIA();
+                        }
                         break;
 
 
@@ -345,41 +360,43 @@ public class Joc {
 
 
     public void jugaIA() throws IOException {
-        while (partida.getPartida()) {
 
-            switch (partida.getEstat()) {
+        while (!jugat2) {
 
-                case TAKE:
+            String cosa = protocol.getElement();
+
+            switch (cosa) {
+
+                case "TAKE":
 
                     protocol.read_take();
                     break;
 
-                case PASS:
-                    protocol.read_pass();
-                    jugat2 = true;
+                case "PASS":
 
-                    if (jugat1 && jugat2){
-                        System.out.println("S'ha acabat la partida");
-                        guanyarPartida();
-                    }
-                    else if(!jugat1){
-                        System.out.println("Ara és el teu torn");
-                        if(mode == 1)
-                            jugarAutomatic(num);
-                        else
-                            jugar();
-                    }
-
+                    jugat2 = protocol.read_pass();
                     break;
 
-
                 default:
-                    System.out.println("S'ha produit un Default");
+                    System.out.println("S'ha produit un Default" + cosa);
                     break;
 
             }
 
         }
+
+        if (jugat1 && jugat2){
+            System.out.println("S'ha acabat la partida");
+            guanyarPartida();
+        }
+        else if(!jugat1){
+            System.out.println("Ara és el teu torn");
+            if(mode == 1)
+                jugarAutomatic(num);
+            else
+                jugar();
+        }
+
     }
 
     public void guanyarPartida() throws IOException {

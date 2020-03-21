@@ -61,7 +61,10 @@ public class Joc {
 
         }
 
-        while (!notPlayed1 && !notPlayed2) {
+        if(singlePlayer) bettSingle();
+        else bettMulti();
+
+        while (!notPlayed1 || !notPlayed2) {
 
             playing = true;
             turn = 0;
@@ -82,7 +85,7 @@ public class Joc {
 
         }
 
-        if (!state.equals("EXIT")) {
+        if (!state.equals("EXIT") && notPlayed1 && notPlayed2) {
 
             sendPuntuacio(0);
 
@@ -127,8 +130,8 @@ public class Joc {
         sendPuntuacio(1);
 
     }
-    private void strt() {
 
+    private void strt() {
 
         if (singlePlayer) {
 
@@ -169,7 +172,7 @@ public class Joc {
 
         pTurn = protocol.turn();
 
-        pTurn = 0;
+        pTurn = 1;
 
         protocol.play(0, pTurn);
 
@@ -272,6 +275,7 @@ public class Joc {
 
             if (pTurn == 0) {
 
+                turn = 3;
                 pTurn = 1;
 
             }
@@ -325,6 +329,8 @@ public class Joc {
 
     private void gameState(int jugadorActual) {
 
+        playing = true;
+
         do {
 
             if (!state.equals("DICE") || diced) {
@@ -337,16 +343,8 @@ public class Joc {
 
             switch (state) {
 
-                case("BETT"):
-
-                    if(singlePlayer) bettSingle();
-                    else bettMulti();
-
-                    break;
-
                 case("DICE"):
 
-                    System.out.println("Estamos en dice");
                     dice(jugadorActual);
                     break;
 
@@ -409,8 +407,6 @@ public class Joc {
 
             jugadorList[1].getNumber();
 
-            protocol.dice(0,8080, jugadorList[1].getDiceList());
-
             int x = 0;
 
             while(x < 3) {
@@ -423,7 +419,7 @@ public class Joc {
 
                     }
 
-                    else if (!jugadorList[1].getLockedList()[i] && jugadorList[1].getLockedDices().size() < 3) {
+                    else if (!jugadorList[1].getLockedList()[i] && jugadorList[1].getLockedDices().size() < 3 && jugadorList[1].getLockedDices().size() > 0) {
 
                         int d = jugadorList[1].getLockedDices().get(jugadorList[1].getLockedDices().size() - 1);
 
@@ -439,7 +435,7 @@ public class Joc {
 
                 x ++;
 
-            } // Seleccio dels daus a guardar
+            }
 
             protocol.take(0,jugadorList[1].getId(), jugadorList[1].getLockedDices());
 
@@ -456,7 +452,12 @@ public class Joc {
 
         }
 
-        protocol.pnts(0,8080, jugadorList[1].getPuntuacion());
+        if (turn >= 2) {
+
+            protocol.pass(0, 8080);
+            System.out.println("HOLA HE PASADO POR AQUI" + turn);
+
+        }
 
         notPlayed2 = true;
         pTurn = 0;

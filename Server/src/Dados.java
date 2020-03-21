@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Random;
 
 public class Dados {
@@ -21,7 +22,7 @@ public class Dados {
 
         }
 
-    } // Randomizar los dados que el jugador haya decidido no lockear
+    }
 
     public void sortDices(ArrayList<Integer> d) {
 
@@ -29,7 +30,21 @@ public class Dados {
 
         while(d.size() > 0) {
 
+
+            System.out.println("Valor e: " + e);
+
+            System.out.println("Valor Size d: " + d.size());
+
+            System.out.println("Long lockedDices: " + lockedDices.size());
+
+            System.out.println("Posicion en la lista de dados: " + d.get(e));
+
+
+
+
             if (diceList[d.get(e)] == 6 && lockedDices.size() == 0) {
+
+                System.out.println(1);
 
                 lockedList[d.get(e)] = true;
                 lockedDices.add(diceList[d.get(e)]);
@@ -39,7 +54,18 @@ public class Dados {
 
             }
 
-            else if(!lockedList[d.get(e)] && lockedDices.size() < 3) {
+            else if (lockedDices.contains(diceList[d.get(e)])) {
+
+                System.out.println(2);
+
+                d.remove(e);
+                e = 0;
+
+            }
+
+            else if(!lockedList[d.get(e)] && lockedDices.size() < 3 && lockedDices.size() > 0) {
+
+                System.out.println(3);
 
                 int l = lockedDices.get(lockedDices.size() - 1);
 
@@ -53,19 +79,44 @@ public class Dados {
 
                 }
 
+                else {
+
+                    if(d.contains(5)){
+
+                        e++;
+
+                    }
+
+                    else {
+
+                        d.remove(e);
+                        e = 0;
+
+                    }
+
+                }
+
+
+            }
+
+            else if(diceList[d.get(e)] < 4) {
+
+                System.out.println(4);
+
+                d.remove(e);
+                e = 0;
+
             }
 
             else {
 
-                // error
+                e ++;
 
             }
 
-            e ++;
-
         }
 
-    } // Lockea los dados que el jugador haya lockeado xd
+    }
 
     public int calculateScore() {
 
@@ -87,25 +138,25 @@ public class Dados {
 
         return score;
 
-    } // Suma los valores de los dados que el jugador no haya lockeado, si la lista de lockeados es menor que 3, devuelve 0 :(
+    }
 
     public int[] getDiceList() {
 
         return diceList;
 
-    } // Devuelve los valores de los dados
+    }
 
     public boolean[] getLockedList() {
 
         return lockedList;
 
-    } // Devuelve los dados lockeados por el jugador
+    }
 
     public ArrayList<Integer> getLockedDices() {
 
         return lockedDices;
 
-    } // Devuelve los dados lockeados (6, 5...)
+    }
 
     public void addLockedDice(int i) {
 

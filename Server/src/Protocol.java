@@ -63,12 +63,16 @@ public class Protocol {
                 utilsL[jugadorActual].write_string("TAKE");
                 utilsL[jugadorActual].write_blankSpace();
                 utilsL[jugadorActual].write_int32(id);
+                utilsL[jugadorActual].write_blankSpace();
                 utilsL[jugadorActual].write_byte((byte) dados.size());
+
+                System.out.println(dados.size());
 
                 for (int i = 0; i < dados.size(); i ++) {
 
                     utilsL[jugadorActual].write_blankSpace();
-                    utilsL[jugadorActual].write_byte((byte) dados.get(i));
+                    int dau = (int) dados.get(i);
+                    utilsL[jugadorActual].write_byte((byte) dau);
 
                 }
 
@@ -96,6 +100,8 @@ public class Protocol {
     }
 
     public void pass (int jugadorActual, int id) {
+
+        System.out.println("HOLA");
 
         try {
 
@@ -163,7 +169,6 @@ public class Protocol {
 
         try {
 
-
             utilsL[jugadorActual].write_string("DICE");
             utilsL[jugadorActual].write_blankSpace();
             utilsL[jugadorActual].write_int32(id);
@@ -171,8 +176,6 @@ public class Protocol {
             for (int i = 0; i < dices.length; i++) {
 
                 utilsL[jugadorActual].write_blankSpace();
-
-                System.out.println(dices[i]);
 
                 utilsL[jugadorActual].write_char((char) dices[i]);
 
@@ -256,7 +259,7 @@ public class Protocol {
 
     public ArrayList<Integer> readTake(int jugadorActual) {
 
-        int amm;
+        int amm = 0;
         ArrayList<Integer> dicesPos = new ArrayList<>();
 
         try {
@@ -266,13 +269,11 @@ public class Protocol {
             utilsL[jugadorActual].read_blankSpace();
             amm = (int)utilsL[jugadorActual].read_byte();
 
-            System.out.println(amm);
-
             for (int i = 0; i < amm; i ++) {
 
                 utilsL[jugadorActual].read_blankSpace();
 
-                //dicesPos.add(Integer.valueOf(utilsL[jugadorActual].read_byte()));
+                dicesPos.add(Integer.valueOf(utilsL[jugadorActual].read_byte()));
 
             }
 
@@ -287,7 +288,7 @@ public class Protocol {
 
         }
 
-        if(dicesPos.size() > 0) {
+        if(amm > 0) {
 
             return dicesPos;
 

@@ -274,19 +274,16 @@ public class Protocol{
         ArrayList<Integer> dicesPos = new ArrayList<>();
 
         try {
-            take = utils.read_string();
+
             utils.read_blankSpace();
             utils.read_int32();
             utils.read_blankSpace();
             amm = (int)utils.read_byte();
 
-            System.out.println(amm);
-
             for (int i = 0; i < amm; i ++) {
 
                 utils.read_blankSpace();
-
-                //dicesPos.add(Integer.valueOf(utils.read_byte()));
+                dicesPos.add(Integer.valueOf(utils.read_byte()));
             }
         }
         catch(IOException e) {
@@ -320,29 +317,17 @@ public class Protocol{
     /*** Funció que ens indica si el contrincant ha passat ***/
     public boolean read_pass() {
 
-            String pass = "";
+        try {
 
-            try {
-                pass = utils.read_string();
-                utils.read_blankSpace();
-                utils.read_int32();
-            }
-            catch(IOException e) {
-                System.out.println("No hem pogut rebre l'acció del contrincant");
-            }
+            utils.read_blankSpace();
+            utils.read_int32();
+        }
+        catch(IOException e) {
+            System.out.println("No hem pogut rebre l'acció del contrincant");
+        }
 
-            if (pass.equals("PASS")){
-                return true;
-            }
-            else{
-                try {
-                    error();
-                } catch (IOException e){
-                    System.out.println("Hi ha hagut un error al rrebre el PASS");
-                }
-            }
+        return true;
 
-        return false;
     }
 
     /*** Funció que retorna la puntuació obtinguda pel jugador ***/
@@ -414,6 +399,21 @@ public class Protocol{
         }
     }
 
+    public String getElement() {
 
+        String el = "";
+
+        try {
+
+            el = utils.read_string();
+            System.out.println(el);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return el;
+
+    }
 
 }
