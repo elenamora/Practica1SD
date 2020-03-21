@@ -17,16 +17,15 @@ public class Joc {
     private ArrayList daus = new ArrayList();
     public ArrayList dausGuardats = new ArrayList();
     public int tirades = 3;
-    private boolean partidaAcabada, jugat1, jugat2;
+    private boolean jugat1, jugat2;
 
 
     public Joc(Protocol p, int mode, int id, int num) throws IOException {
 
         this.id = id;
         this.num = num;
-        this.partidaAcabada = false;
-        this.jugat1 = false;
         this.jugat2 = false;
+        this.jugat1 = false;
         this.partida = new Partida();
         this.protocol = p;
         this.mode = mode;
@@ -160,6 +159,16 @@ public class Joc {
                 case PASS:
                     protocol.pass(id);
                     partida.setEstat(Partida.EstatPartida.PASS);
+                    jugat1 = true;
+
+                    if (jugat1 && jugat2){
+                        System.out.println("S'ha acabat la partida");
+                        guanyarPartida();
+                    }
+                    else if(!jugat2){
+                        System.out.println("Ara és el torn del teu contrincant");
+                        jugaIA();
+                    }
                     break;
 
 
@@ -318,7 +327,7 @@ public class Joc {
     }
 
 
-    public void jugaIA(){
+    public void jugaIA() throws IOException {
         while (partida.getPartida()) {
 
             switch (partida.getEstat()) {
@@ -330,11 +339,22 @@ public class Joc {
 
                 case PASS:
                     protocol.read_pass();
+                    jugat2 = true;
+
+                    if (jugat1 && jugat2){
+                        System.out.println("S'ha acabat la partida");
+                        guanyarPartida();
+                    }
+                    else if(!jugat1){
+                        System.out.println("Ara és el teu torn");
+                        if(mode == 1)
+                            jugarAutomatic(num);
+                        else
+                            jugar();
+                    }
+
                     break;
 
-                case EXIT:
-
-                    break;
 
                 default:
                     System.out.println("S'ha produit un Default");
