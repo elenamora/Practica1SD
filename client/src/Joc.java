@@ -44,8 +44,9 @@ public class Joc {
         if (puntuacio == 0) {
             System.out.println("No tens diners per seguir jugant");
             guanyarPartida();
-            protocol.desconnexio();
             protocol.exit();
+            protocol.desconnexio();
+
 
         } else {
 
@@ -400,6 +401,9 @@ public class Joc {
     }
 
     public void guanyarPartida() throws IOException {
+
+        System.out.println("La teva puntuació final és: " + protocol.read_pnts() + "punts");
+
         if (protocol.read_win() == 0) {
             System.out.println("Has guanyat");
         } else if(protocol.read_win() == 1){
@@ -408,8 +412,6 @@ public class Joc {
         else if(protocol.read_win() == 2) {
             System.out.println("Empat");
         }
-
-        System.out.println("La teva puntuació final és: " + protocol.read_pnts() + "punts");
 
         while (protocol.read_cash() == -1){
 

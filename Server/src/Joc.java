@@ -61,15 +61,23 @@ public class Joc {
 
         }
 
-        if(singlePlayer) bettSingle();
-        else bettMulti();
+        if(!notPlayed1 && !notPlayed2) {
+
+            if(singlePlayer) bettSingle();
+            else bettMulti();
+
+        }
 
         while (!notPlayed1 || !notPlayed2) {
 
             playing = true;
             turn = 0;
 
-            if (pTurn == 0) {
+            System.out.println("EL pturn es: " + pTurn);
+            System.out.println("PLAYER 1: " + notPlayed1);
+            System.out.println("PLAYER 2: " + notPlayed2);
+
+            if (pTurn == 0 && !notPlayed1) {
 
                 gameState(0);
 
@@ -77,13 +85,15 @@ public class Joc {
 
             }
 
-            else {
+            else if (pTurn == 1 && !notPlayed2){
 
                 jugaIA();
 
             }
 
         }
+
+        System.out.println("HOLA D:");
 
         if (!state.equals("EXIT") && notPlayed1 && notPlayed2) {
 
@@ -275,6 +285,9 @@ public class Joc {
 
             if (pTurn == 0) {
 
+                System.out.println("ESTOY AQUI EN PTURN");
+
+                notPlayed1 = true;
                 turn = 3;
                 pTurn = 1;
 
@@ -333,7 +346,9 @@ public class Joc {
 
         do {
 
-            if (!state.equals("DICE") || diced) {
+            System.out.println("HOLA" + state);
+
+            if (!state.equals("DICE") || diced == true) {
 
                 state = protocol.readElement(jugadorActual);
 
@@ -367,11 +382,16 @@ public class Joc {
 
         } while (playing || turn < 3);
 
+        System.out.println("HEMOS SALIDO DEL WHILE");
+
     }
 
     private void sendPuntuacio(int jugador) {
 
-        if(jugadorList[0].getPuntuacion() > jugadorList[1].getPuntuacion()) {
+        System.out.println("P1: " + jugadorList[0].calculcateScore());
+        System.out.println("P2: " + jugadorList[1].calculcateScore());
+
+        if(jugadorList[0].calculcateScore() > jugadorList[1].calculcateScore()) {
 
             jugadorList[1].setDinero(bett);
 
@@ -383,7 +403,7 @@ public class Joc {
 
         }
 
-        else if (jugadorList[0].getPuntuacion() < jugadorList[1].getPuntuacion()){
+        else if (jugadorList[0].calculcateScore() < jugadorList[1].calculcateScore()){
 
             bett = 0;
 
@@ -393,7 +413,7 @@ public class Joc {
 
         }
 
-        else {
+        else if (jugadorList[0].calculcateScore() == jugadorList[1].calculcateScore()){
 
             protocol.wins(jugador,2);
 
@@ -452,10 +472,9 @@ public class Joc {
 
         }
 
-        if (turn >= 2) {
+        if (turn >= 2 && playing) {
 
             protocol.pass(0, 8080);
-            System.out.println("HOLA HE PASADO POR AQUI" + turn);
 
         }
 

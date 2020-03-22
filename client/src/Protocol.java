@@ -5,9 +5,9 @@ import java.util.Scanner;
 
 public class Protocol{
 
-    InetAddress maquinaServidora;
-    Socket socket;
-    ComUtils utils;
+    private InetAddress maquinaServidora;
+    private Socket socket;
+    private ComUtils utils;
 
 
     /*** Funció que ens permet conncetar-nos a un socket ***/

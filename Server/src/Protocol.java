@@ -44,8 +44,6 @@ public class Protocol {
 
             socket1 = serverSocket1.accept();
 
-            System.out.println("Hola");
-
             utils1 = new ComUtils(socket1);
 
             utilsL = new ComUtils[]{utils1};
@@ -88,6 +86,8 @@ public class Protocol {
 
                 utilsL[jugadorActual].write_string("TAKE");
                 utilsL[jugadorActual].write_blankSpace();
+                utilsL[jugadorActual].write_int32(id);
+                utilsL[jugadorActual].write_blankSpace();
                 utilsL[jugadorActual].write_byte((byte) dados.size());
 
             } catch (IOException e) {
@@ -101,7 +101,7 @@ public class Protocol {
 
     public void pass (int jugadorActual, int id) {
 
-        System.out.println("HOLA");
+        System.out.println("PASS");
 
         try {
 
@@ -215,7 +215,7 @@ public class Protocol {
 
             utilsL[jugadorActual].write_string("WINS");
             utilsL[jugadorActual].write_blankSpace();
-            utilsL[jugadorActual].write_int32(win);
+            utilsL[jugadorActual].write_char((char) win);
 
         }
 
