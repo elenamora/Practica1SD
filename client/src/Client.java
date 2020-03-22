@@ -8,7 +8,7 @@ public class Client{
     public static void main(String[] args2) throws IOException, TimeoutException {
 
         String[] args = {"25.99.172.37", "5000", "0"};
-        //String[] args = {"25.71.79.215", "5000", "0"};
+        //String[] args = {"25.71.79.215", "5001", "0"};
 
 
         String nomMaquina;

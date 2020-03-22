@@ -32,25 +32,26 @@ public class Joc {
         this.mode = mode;
         sc = new Scanner(System.in);
 
-        puntuacio = protocol.read_cash();
-
-        System.out.println("El teu CASH és de: " + puntuacio);
-
         bett();
 
     }
 
     public void bett() throws IOException {
+
+        puntuacio = protocol.read_cash();
+
+        System.out.println("El teu CASH és de: " + puntuacio);
+
         if (puntuacio == 0) {
             System.out.println("No tens diners per seguir jugant");
             guanyarPartida();
             protocol.exit();
             protocol.desconnexio();
 
-
         } else {
 
             protocol.bett();
+
             System.out.println("Hem fet la BETT");
 
             System.out.println("El LOOT és " + protocol.read_loot());
@@ -89,7 +90,10 @@ public class Joc {
             switch (partida.getEstat()) {
 
                 case ROLL:
+
                     if (tirades > 0) {
+
+                        System.out.println("Hemos vuelto a entrar");
 
                         daus = protocol.read_dice();
 
@@ -151,7 +155,6 @@ public class Joc {
                         }
                     }
 
-
                     System.out.println("Els daus que has guardat són: " + dausMostrar);
 
                     protocol.take(id, dausGuardats);
@@ -173,6 +176,9 @@ public class Joc {
                         if(n == 0){
                             jugat1 = false;
                             jugat2 = false;
+                            tirades = 3;
+                            dausMostrar.removeAll(dausMostrar);
+                            dausGuardats.removeAll(dausGuardats);
                             bett();
                         }
                         else if(n == 1){
@@ -189,7 +195,6 @@ public class Joc {
                     }
                     break;
 
-
                 case EXIT:
 
                     System.out.println("Vols abandonar el joc? (0 (sí) | 1 (no))");
@@ -203,7 +208,7 @@ public class Joc {
                         jugat2 = true;
                         jugat1 = true;
                         partida.setEstat(Partida.EstatPartida.BETT);
-                        bett();
+                        //bett();
                     }
 
                     break;
@@ -217,7 +222,6 @@ public class Joc {
         }
 
     }
-
 
     public void jugarAutomatic(int numPartides) throws IOException {
 
@@ -359,7 +363,6 @@ public class Joc {
         }
     }
 
-
     public void jugaIA() throws IOException {
 
         while (!jugat2) {
@@ -413,11 +416,9 @@ public class Joc {
             System.out.println("Empat");
         }
 
-        while (protocol.read_cash() == -1){
+        System.out.println("HOLA");
 
-        }
     }
-
 
 }
 

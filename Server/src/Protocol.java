@@ -8,7 +8,10 @@ public class Protocol {
 
     private Socket socket1, socket2;
     ComUtils utils1, utils2;
+    ComUtils utilsLog;
     Random random = new Random();
+
+    File file = new File("test");
 
     private int singlePlayer;
 
@@ -22,6 +25,10 @@ public class Protocol {
         portServidor = Integer.parseInt(args[0]);
 
         singlePlayer = Integer.parseInt(args[1]);
+
+        file.createNewFile();
+
+        utilsLog = new ComUtils(new FileInputStream(file), new FileOutputStream(file));
 
         if (singlePlayer == 2) {
 
@@ -59,38 +66,57 @@ public class Protocol {
             try {
 
                 utilsL[jugadorActual].write_string("TAKE");
+                utilsLog.write_string("TAKE");
                 utilsL[jugadorActual].write_blankSpace();
+                utilsLog.write_blankSpace();
                 utilsL[jugadorActual].write_int32(id);
+                utilsLog.write_int32(id);
                 utilsL[jugadorActual].write_blankSpace();
+                utilsLog.write_blankSpace();
                 utilsL[jugadorActual].write_byte((byte) dados.size());
-
-                System.out.println(dados.size());
+                utilsLog.write_byte((byte) dados.size());
 
                 for (int i = 0; i < dados.size(); i ++) {
 
                     utilsL[jugadorActual].write_blankSpace();
+                    utilsLog.write_blankSpace();
                     int dau = (int) dados.get(i);
                     utilsL[jugadorActual].write_byte((byte) dau);
+                    utilsLog.write_byte((byte) dau);
 
                 }
 
-            } catch (IOException e) {
+                utilsLog.write_string("\n");
+
+            }
+
+            catch (IOException e) {
 
                 e.printStackTrace();
             }
 
+        }
 
-        } else {
+        else {
 
             try {
 
                 utilsL[jugadorActual].write_string("TAKE");
+                utilsLog.write_string("TAKE");
                 utilsL[jugadorActual].write_blankSpace();
+                utilsLog.write_blankSpace();
                 utilsL[jugadorActual].write_int32(id);
+                utilsLog.write_int32(id);
                 utilsL[jugadorActual].write_blankSpace();
+                utilsLog.write_blankSpace();
                 utilsL[jugadorActual].write_byte((byte) dados.size());
+                utilsLog.write_byte((byte) dados.size());
 
-            } catch (IOException e) {
+                utilsLog.write_string("\n");
+
+            }
+
+            catch (IOException e) {
 
                 e.printStackTrace();
             }
@@ -101,13 +127,16 @@ public class Protocol {
 
     public void pass (int jugadorActual, int id) {
 
-        System.out.println("PASS");
-
         try {
 
             utilsL[jugadorActual].write_string("PASS");
+            utilsLog.write_string("PASS");
             utilsL[jugadorActual].write_blankSpace();
+            utilsLog.write_blankSpace();
             utilsL[jugadorActual].write_int32(id);
+            utilsLog.write_int32(id);
+
+            utilsLog.write_string("\n");
 
         } catch (IOException e) {
 
@@ -121,8 +150,13 @@ public class Protocol {
         try {
 
             utilsL[jugadorActual].write_string("CASH");
+            utilsLog.write_string("CASH");
             utilsL[jugadorActual].write_blankSpace();
+            utilsLog.write_blankSpace();
             utilsL[jugadorActual].write_int32(dinero);
+            utilsLog.write_int32(dinero);
+
+            utilsLog.write_string("\n");
 
         } catch (IOException e) {
 
@@ -136,8 +170,13 @@ public class Protocol {
         try {
 
             utilsL[jugadorActual].write_string("LOOT");
+            utilsLog.write_string("LOOT");
             utilsL[jugadorActual].write_blankSpace();
+            utilsLog.write_blankSpace();
             utilsL[jugadorActual].write_int32(dinero);
+            utilsLog.write_int32(dinero);
+
+            utilsLog.write_string("\n");
 
         }
 
@@ -153,8 +192,13 @@ public class Protocol {
         try {
 
             utilsL[jugadorActual].write_string("PLAY");
+            utilsLog.write_string("PLAY");
             utilsL[jugadorActual].write_blankSpace();
+            utilsLog.write_blankSpace();
             utilsL[jugadorActual].write_char((char)turno);
+            utilsLog.write_char((char)turno);
+
+            utilsLog.write_string("\n");
 
         }
 
@@ -170,16 +214,22 @@ public class Protocol {
         try {
 
             utilsL[jugadorActual].write_string("DICE");
+            utilsLog.write_string("DICE");
             utilsL[jugadorActual].write_blankSpace();
+            utilsLog.write_blankSpace();
             utilsL[jugadorActual].write_int32(id);
+            utilsLog.write_int32(id);
 
             for (int i = 0; i < dices.length; i++) {
 
                 utilsL[jugadorActual].write_blankSpace();
-
+                utilsLog.write_blankSpace();
                 utilsL[jugadorActual].write_char((char) dices[i]);
+                utilsLog.write_char((char) dices[i]);
 
             }
+
+            utilsLog.write_string("\n");
 
         }
 
@@ -200,6 +250,12 @@ public class Protocol {
             utilsL[jugadorActual].write_blankSpace();
             utilsL[jugadorActual].write_int32(score);
 
+            utilsLog.write_string("PNTS");
+            utilsLog.write_blankSpace();
+            utilsLog.write_int32(id);
+            utilsLog.write_blankSpace();
+            utilsLog.write_int32(score);
+
         }
 
         catch (IOException e) {
@@ -216,6 +272,10 @@ public class Protocol {
             utilsL[jugadorActual].write_string("WINS");
             utilsL[jugadorActual].write_blankSpace();
             utilsL[jugadorActual].write_char((char) win);
+
+            utilsLog.write_string("WINS");
+            utilsLog.write_blankSpace();
+            utilsLog.write_char((char) win);
 
         }
 
@@ -261,22 +321,32 @@ public class Protocol {
 
         int amm = 0;
         ArrayList<Integer> dicesPos = new ArrayList<>();
+        int id, el;
 
         try {
 
             utilsL[jugadorActual].read_blankSpace();
-            utilsL[jugadorActual].read_int32();
+            utilsLog.write_blankSpace();
+            id = utilsL[jugadorActual].read_int32();
+            utilsLog.write_int32(id);
             utilsL[jugadorActual].read_blankSpace();
+            utilsLog.write_blankSpace();
             amm = (int)utilsL[jugadorActual].read_byte();
+            utilsLog.write_int32(amm);
 
-            for (int i = 0; i < amm; i ++) {
+            if (amm > 0) {
 
-                utilsL[jugadorActual].read_blankSpace();
+                for (int i = 0; i < amm; i ++) {
 
-                dicesPos.add(Integer.valueOf(utilsL[jugadorActual].read_byte()));
+                    utilsL[jugadorActual].read_blankSpace();
+                    utilsLog.write_blankSpace();
+                    el = Integer.valueOf(utilsL[jugadorActual].read_byte());
+                    utilsLog.write_int32(el);
+                    dicesPos.add(el);
+
+                }
 
             }
-
 
         }
 
@@ -310,6 +380,7 @@ public class Protocol {
         try {
 
             element  = utilsL[jugadorActual].read_string();
+            utilsLog.write_string(element);
 
         }
 
@@ -335,6 +406,34 @@ public class Protocol {
         catch(IOException e) {
 
             e.printStackTrace();
+
+        }
+
+    }
+
+    public void desconnexio(int jugadorActual) {
+
+        if (jugadorActual == 0) {
+
+            try {
+                if (socket1 != null) {
+                    socket1.close();
+                    System.out.println("Hem desconnectat de la partida");
+                }
+            } catch (IOException e) {
+                System.out.println("No s'ha pogut desconnectar del servidor");
+            }
+
+        } else {
+
+            try {
+                if (socket2 != null) {
+                    socket2.close();
+                    System.out.println("Hem desconnectat de la partida");
+                }
+            } catch (IOException e) {
+                System.out.println("No s'ha pogut desconnectar del servidor");
+            }
 
         }
 

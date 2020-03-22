@@ -30,18 +30,6 @@ public class Dados {
 
         while(d.size() > 0) {
 
-
-            System.out.println("Valor e: " + e);
-
-            System.out.println("Valor Size d: " + d.size());
-
-            System.out.println("Long lockedDices: " + lockedDices.size());
-
-            System.out.println("Posicion en la lista de dados: " + d.get(e));
-
-
-
-
             if (diceList[d.get(e)] == 6 && lockedDices.size() == 0) {
 
                 System.out.println(1);

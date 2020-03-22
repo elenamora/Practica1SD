@@ -5,7 +5,7 @@ public class Server{
 
     public static void main(String[] args) throws IOException {
 
-        String[] args2 = {"5000", "1"};
+        String[] args2 = {"5000", "2"};
 
         if(args2.length != 2){
 

@@ -5,9 +5,9 @@ import java.util.Scanner;
 
 public class Protocol{
 
-    private InetAddress maquinaServidora;
-    private Socket socket;
-    private ComUtils utils;
+    InetAddress maquinaServidora;
+    Socket socket;
+    ComUtils utils;
 
 
     /*** Funció que ens permet conncetar-nos a un socket ***/
@@ -39,7 +39,6 @@ public class Protocol{
         }
     }
 
-
     /*** Funció que ens permet iniciar la partida on hem d'indicar el nostre id com a jugadors ***/
     public void start(int id) {
 
@@ -54,7 +53,6 @@ public class Protocol{
             System.out.println("No s'ha pogut iniciar partida");
         }
     }
-
 
     public void bett(){
 
@@ -135,9 +133,10 @@ public class Protocol{
         }
     }
 
-
     /*** Funció que rep el cash que ens envia el Servidor ***/
     public int read_cash() throws IOException{
+
+        System.out.println("NOS hemos quedado aqui");
 
         String cash = "";
         int val = -1;
@@ -146,10 +145,14 @@ public class Protocol{
         utils.read_blankSpace();
         val = utils.read_int32();
 
+        System.out.println(val);
+
         if (cash.equals("CASH")) {
             return val;
         }
 
+
+        /*
         else{
             try {
                 error();
@@ -158,10 +161,10 @@ public class Protocol{
             }
         }
 
+         */
+
         return val;
     }
-
-
 
     public int read_loot() {
 
@@ -182,6 +185,7 @@ public class Protocol{
             return dinero;
 
         }
+        /*
         else{
             try {
                 error();
@@ -189,6 +193,8 @@ public class Protocol{
                 System.out.println("Hi ha hagut un error al rebre el loot");
             }
         }
+
+         */
         return -1;
 
     }
@@ -213,6 +219,7 @@ public class Protocol{
         if (play.equals("PLAY")){
             return turn;
         }
+        /*
         else{
             try {
                 error();
@@ -220,6 +227,8 @@ public class Protocol{
                 System.out.println("Hi ha hagut un error al rebre l'ordre de tirada");
             }
         }
+
+         */
         return turn;
 
     }
@@ -233,7 +242,6 @@ public class Protocol{
         try {
 
             dice = utils.read_string();
-            System.out.println(dice);
             utils.read_blankSpace();
             utils.read_int32();
 
@@ -254,7 +262,7 @@ public class Protocol{
         if (dice.equals("DICE")) {
             return daus;
         }
-
+/*
         else{
             try {
                 error();
@@ -262,6 +270,8 @@ public class Protocol{
                 System.out.println("Hi ha hagut un error al rebre els daus");
             }
         }
+
+ */
 
         return daus;
     }
@@ -300,7 +310,7 @@ public class Protocol{
                 return dicesPos;
             }
         }
-
+/*
         else{
             try {
                 error();
@@ -309,10 +319,10 @@ public class Protocol{
             }
         }
 
+ */
+
         return dicesPos;
     }
-
-
 
     /*** Funció que ens indica si el contrincant ha passat ***/
     public boolean read_pass() {
@@ -350,6 +360,7 @@ public class Protocol{
         if (pnts.equals("PNTS")){
             return score;
         }
+        /*
         else{
             try {
                 error();
@@ -357,6 +368,8 @@ public class Protocol{
                 System.out.println("Hi ha hagut un error al rebre la puntuació");
             }
         }
+
+         */
         return score;
 
     }
@@ -379,6 +392,7 @@ public class Protocol{
         if (win.equals("WINS")){
             return ganador;
         }
+        /*
         else{
             try {
                 error();
@@ -386,6 +400,8 @@ public class Protocol{
                 System.out.println("Hi ha hagut un error al rebre el cash");
             }
         }
+
+         */
         return -1;
     }
 

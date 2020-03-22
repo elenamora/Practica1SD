@@ -12,6 +12,11 @@ public class ComUtils {
         dataOutputStream = new DataOutputStream(socket.getOutputStream());
     }
 
+    public ComUtils(InputStream inputStream, OutputStream outputStream) throws IOException {
+        dataInputStream = new DataInputStream(inputStream);
+        dataOutputStream = new DataOutputStream(outputStream);
+    }
+
 
     public int read_int32() throws IOException {
         byte bytes[] = read_bytes(4);
